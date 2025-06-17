@@ -1,0 +1,21 @@
+{
+  "name": "network-latency-optimization-framework",
+  "version": "1.0.0",
+  "description": "Reproducible research tool for network routing performance analysis",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build required'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "network",
+    "latency", 
+    "optimization",
+    "google-cloud",
+    "performance",
+    "testing"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
