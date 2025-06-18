@@ -1,13 +1,11 @@
 {
-  "name": "network-latency-tester",
+  "name": "geographic-routing-performance-tool",
   "version": "2.0.0",
   "description": "A comprehensive browser-based tool for measuring and comparing network routing performance across different geographic paths and infrastructure providers",
   "main": "index.html",
   "scripts": {
     "dev": "npx serve .",
-    "build": "echo 'Static site - no build needed'",
-    "start": "npx serve .",
-    "test": "echo 'No tests specified'"
+    "start": "npx serve ."
   },
   "keywords": [
     "networking",
@@ -30,11 +28,5 @@
   "bugs": {
     "url": "https://github.com/ces0491/network-latency-tester/issues"
   },
-  "homepage": "https://github.com/ces0491/network-latency-tester#readme",
-  "devDependencies": {
-    "serve": "^14.2.1"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  }
+  "homepage": "https://github.com/ces0491/network-latency-tester#readme"
 }
