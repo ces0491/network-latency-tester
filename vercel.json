@@ -1,28 +1,8 @@
 {
-  "version": 2,
-  "name": "network-latency-tester",
-  "builds": [
+  "rewrites": [
     {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "docs.html", 
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/docs.html",
-      "dest": "/docs.html"
-    },
-    {
-      "src": "/docs",
-      "dest": "/docs.html"
+      "source": "/docs",
+      "destination": "/docs.html"
     }
   ],
   "headers": [
