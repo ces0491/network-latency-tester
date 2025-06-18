@@ -1,21 +1,40 @@
 {
-  "name": "network-latency-optimization-framework",
-  "version": "1.0.0",
-  "description": "Reproducible research tool for network routing performance analysis",
+  "name": "network-latency-tester",
+  "version": "2.0.0",
+  "description": "A comprehensive browser-based tool for measuring and comparing network routing performance across different geographic paths and infrastructure providers",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Static site - no build required'",
-    "start": "vercel dev"
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx serve .",
+    "test": "echo 'No tests specified'"
   },
   "keywords": [
-    "network",
-    "latency", 
-    "optimization",
-    "google-cloud",
+    "networking",
+    "routing",
     "performance",
-    "testing"
+    "latency",
+    "geographic",
+    "infrastructure",
+    "cloud",
+    "cdn",
+    "testing",
+    "analysis"
   ],
-  "author": "Your Name",
-  "license": "MIT"
+  "author": "Ces",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ces0491/network-latency-tester.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ces0491/network-latency-tester/issues"
+  },
+  "homepage": "https://github.com/ces0491/network-latency-tester#readme",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }

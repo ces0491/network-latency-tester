@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Latency Optimization Testing Framework</title>
+    <title>Geographic Routing Performance Testing Tool</title>
+    <meta name="description" content="Compare network routing performance across different geographic paths and infrastructure providers">
     <style>
         * {
             margin: 0;
@@ -32,6 +33,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -43,11 +45,33 @@
         .header p {
             opacity: 0.9;
             font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .header-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
         }
         
         .main-content {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 400px 1fr;
             min-height: 700px;
         }
         
@@ -55,6 +79,8 @@
             background: #f8f9fa;
             padding: 30px;
             border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            max-height: 100vh;
         }
         
         .content-area {
@@ -88,18 +114,75 @@
             color: #555;
         }
         
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 2px solid #e9ecef;
             border-radius: 6px;
             font-size: 14px;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
         
-        .form-group input:focus, .form-group select:focus {
+        .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
             border-color: #3498db;
+        }
+        
+        .route-entry {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        
+        .route-entry.enabled {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+        
+        .route-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .route-checkbox {
+            margin-right: 10px;
+        }
+        
+        .route-type {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .route-type.traditional {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .route-type.optimized {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .route-type.reference {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .route-type.custom {
+            background: #f3e5f5;
+            color: #7b1fa2;
         }
         
         .btn {
@@ -127,6 +210,13 @@
         
         .btn-warning {
             background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+            width: auto;
+            margin: 5px 5px 0 0;
         }
         
         .results-container {
@@ -228,27 +318,6 @@
             color: #2c3e50;
         }
         
-        .highlight {
-            background: linear-gradient(135deg, #27ae60, #229954);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #e9ecef;
-        }
-        
         .status-indicator {
             display: inline-block;
             width: 12px;
@@ -270,6 +339,10 @@
             background: #95a5a6;
         }
         
+        .status-error {
+            background: #e74c3c;
+        }
+        
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -288,158 +361,76 @@
             white-space: pre-wrap;
         }
         
-        .report-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .report-header {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px 8px 0 0;
-            margin: -20px -20px 20px -20px;
-        }
-        
-        .report-header h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.4em;
-        }
-        
-        .report-subtitle {
-            opacity: 0.9;
-            font-size: 0.9em;
-        }
-        
-        .recommendation-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-        
-        .recommendation-high {
-            border-left-color: #27ae60;
-            background: linear-gradient(135deg, #d5f4e6, #a9e2c7);
-        }
-        
-        .recommendation-medium {
-            border-left-color: #f39c12;
-            background: linear-gradient(135deg, #fef9e7, #fcf3cf);
-        }
-        
-        .recommendation-low {
-            border-left-color: #e74c3c;
-            background: linear-gradient(135deg, #fadbd8, #f5b7b1);
-        }
-        
-        .priority-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .priority-high {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .priority-medium {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .priority-low {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .kpi-card {
-            background: white;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .kpi-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        
-        .kpi-positive {
-            color: #27ae60;
-        }
-        
-        .kpi-warning {
-            color: #f39c12;
-        }
-        
-        .kpi-negative {
-            color: #e74c3c;
-        }
-        
-        .implementation-step {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        
-        .step-number {
-            background: #3498db;
-            color: white;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
+        .endpoint-status {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9em;
-            position: absolute;
-            left: -12px;
-            top: 15px;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
         }
         
-        .roi-projection {
-            background: linear-gradient(135deg, #27ae60, #229954);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 20px 0;
+        .endpoint-status.success {
+            border-left-color: #27ae60;
         }
         
-        .export-options {
-            display: flex;
+        .endpoint-status.error {
+            border-left-color: #e74c3c;
+        }
+        
+        .endpoint-status.testing {
+            border-left-color: #f39c12;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #0c5460;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #155724;
+        }
+
+        .scenario-selector {
+            margin-bottom: 20px;
+        }
+
+        .preset-scenarios {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
-        
-        .btn-export {
-            background: linear-gradient(135deg, #8e44ad, #7d3c98);
-            flex: 1;
-            min-width: 120px;
+
+        .route-diagram {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.6;
         }
         
         @media (max-width: 768px) {
@@ -450,10 +441,20 @@
             .sidebar {
                 border-right: none;
                 border-bottom: 1px solid #e9ecef;
+                max-height: none;
             }
             
             .metric-grid {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .preset-scenarios {
+                grid-template-columns: 1fr;
+            }
+
+            .header-nav {
+                position: static;
+                margin-top: 10px;
             }
         }
     </style>
@@ -461,226 +462,159 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌐 Network Latency Optimization Testing Framework</h1>
-            <p>Reproducible research tool for network routing performance analysis</p>
+            <div class="header-nav">
+                <a href="/docs.html" class="nav-link">📖 Documentation</a>
+            </div>
+            <h1>🌐 Geographic Routing Performance Testing Tool</h1>
+            <p>Compare routing performance across different network paths and infrastructure providers</p>
         </div>
         
         <div class="main-content">
             <div class="sidebar">
                 <div class="control-group">
+                    <h3>🎯 Test Scenario</h3>
+                    <div class="scenario-selector">
+                        <div class="form-group">
+                            <label>Preset Scenarios:</label>
+                            <div class="preset-scenarios">
+                                <button class="btn btn-small" onclick="loadPresetScenario('sa-au-nz')">SA→AU→NZ</button>
+                                <button class="btn btn-small" onclick="loadPresetScenario('us-eu')">US→EU</button>
+                                <button class="btn btn-small" onclick="loadPresetScenario('asia-pacific')">Asia Pacific</button>
+                                <button class="btn btn-small" onclick="loadPresetScenario('custom')">Custom</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Scenario Description:</label>
+                            <textarea id="scenario-description" placeholder="Describe your routing optimization scenario...">Testing SA→AU→NZ routing: Compare traditional ISP routing via Europe vs Google Cloud backbone routing via Australia</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
                     <h3>🧪 Test Configuration</h3>
                     <div class="form-group">
                         <label>Test Iterations:</label>
-                        <input type="number" id="iterations" value="20" min="5" max="100">
+                        <input type="number" id="iterations" value="30" min="10" max="100">
                     </div>
                     <div class="form-group">
-                        <label>Variance Factor:</label>
-                        <input type="number" id="variance" value="0.15" min="0.05" max="0.3" step="0.01">
+                        <label>Timeout (seconds):</label>
+                        <input type="number" id="timeout" value="15" min="5" max="30">
                     </div>
                     <div class="form-group">
-                        <label>Test Scenario:</label>
-                        <select id="scenario">
-                            <option value="standard">Standard Comparison</option>
-                            <option value="load">Load Testing</option>
-                            <option value="cost">Cost Analysis</option>
-                            <option value="reliability">Reliability Focus</option>
+                        <label>Test Mode:</label>
+                        <select id="testMode">
+                            <option value="ping">Latency Test (HEAD requests)</option>
+                            <option value="download">Download Test (1KB)</option>
+                            <option value="comprehensive">Comprehensive Test</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="control-group">
-                    <h3>🛣️ Route Configuration</h3>
-                    <div class="form-group">
-                        <label>SA to Marseille (ms):</label>
-                        <input type="number" id="sa_marseille" value="180">
+                    <h3>🛣️ Routing Endpoints</h3>
+                    <div id="routing-endpoints">
+                        <!-- Dynamic routing endpoints will be inserted here -->
                     </div>
-                    <div class="form-group">
-                        <label>Marseille to Singapore (ms):</label>
-                        <input type="number" id="marseille_singapore" value="160">
-                    </div>
-                    <div class="form-group">
-                        <label>Singapore to Tokyo (ms):</label>
-                        <input type="number" id="singapore_tokyo" value="80">
-                    </div>
-                    <div class="form-group">
-                        <label>Tokyo to Sydney (ms):</label>
-                        <input type="number" id="tokyo_sydney" value="120">
-                    </div>
-                    <div class="form-group">
-                        <label>Sydney to Auckland (ms):</label>
-                        <input type="number" id="sydney_auckland" value="25">
-                    </div>
+                    <button class="btn btn-small" onclick="addCustomRoute()">+ Add Custom Route</button>
                 </div>
                 
                 <div class="control-group">
-                    <h3>☁️ Google Cloud Config</h3>
-                    <div class="form-group">
-                        <label>SA to Google JHB POP (ms):</label>
-                        <input type="number" id="sa_google_pop" value="15">
-                    </div>
-                    <div class="form-group">
-                        <label>Google Backbone JHB-Sydney (ms):</label>
-                        <input type="number" id="google_backbone" value="280">
-                    </div>
-                    <div class="form-group">
-                        <label>Sydney VM to Auckland (ms):</label>
-                        <input type="number" id="vm_auckland" value="24">
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <h3>🤖 Auto-Optimization</h3>
-                    <div class="form-group">
-                        <label>Optimization Target:</label>
-                        <select id="optimizationTarget">
-                            <option value="latency">Minimize Latency</option>
-                            <option value="cost">Optimize Cost/Performance</option>
-                            <option value="reliability">Maximize Reliability</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Test Scenarios:</label>
-                        <input type="number" id="autoTestScenarios" value="10" min="5" max="50">
-                    </div>
-                    <button class="btn" onclick="runOptimization()">🎯 Auto-Optimize Routes</button>
-                </div>
-                
-                <div class="control-group">
-                    <h3>⚙️ Manual Actions</h3>
-                    <button class="btn" onclick="runTests()">🚀 Run Tests</button>
+                    <h3>⚙️ Actions</h3>
+                    <button class="btn" onclick="runRoutingTests()">🚀 Run Performance Tests</button>
                     <button class="btn btn-success" onclick="exportResults()">📊 Export Results</button>
                     <button class="btn btn-warning" onclick="resetConfiguration()">🔄 Reset Config</button>
-                    <button class="btn" onclick="loadPresetConfig()">📋 Load Presets</button>
+                    <button class="btn" onclick="testEndpointReachability()">🔍 Test Connectivity</button>
                 </div>
                 
                 <div class="control-group">
                     <h3>📊 Test Status</h3>
                     <div id="status">
                         <span class="status-indicator status-idle"></span>
-                        <span>Idle - Ready to run tests</span>
+                        <span>Ready to test routing performance</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress"></div>
                     </div>
+                    <div id="endpoint-status"></div>
                 </div>
             </div>
             
             <div class="content-area">
                 <div class="tabs">
-                    <button class="tab active" onclick="showTab('overview')">📈 Overview</button>
+                    <button class="tab active" onclick="showTab('overview')">📈 Performance Overview</button>
                     <button class="tab" onclick="showTab('detailed')">🔍 Detailed Results</button>
-                    <button class="tab" onclick="showTab('analysis')">📊 Analysis & Optimization</button>
-                    <button class="tab" onclick="showTab('reports')">📄 Reports & Recommendations</button>
-                    <button class="tab" onclick="showTab('logs')">📋 Logs</button>
+                    <button class="tab" onclick="showTab('analysis')">📊 Routing Analysis</button>
+                    <button class="tab" onclick="showTab('logs')">📋 Test Logs</button>
                 </div>
                 
                 <div id="overview" class="tab-content active">
+                    <div class="info-box">
+                        <strong>🎯 Geographic Routing Performance Testing</strong><br>
+                        This tool helps you measure and compare network routing performance across different paths.
+                        Configure your routing scenarios below and run tests to identify the most efficient network paths.
+                    </div>
+
+                    <div id="scenario-visualization">
+                        <div class="route-diagram">
+<strong>CURRENT SCENARIO: SA→AU→NZ Routing Optimization</strong>
+
+<span style="color: #c62828; font-weight: bold;">🔴 TRADITIONAL ISP ROUTING:</span>
+South Africa → ISP → Europe (Marseille) → Asia Pacific → Australia/New Zealand
+
+<span style="color: #2e7d32; font-weight: bold;">🟢 OPTIMIZED ROUTING (Google Cloud):</span>
+South Africa → Google POP → Google Backbone → Australia VM → New Zealand
+
+<span style="color: #1565c0; font-weight: bold;">🔗 HYBRID APPROACHES:</span>
+Various combinations of direct connections, CDNs, and cloud infrastructure
+                        </div>
+                    </div>
+                    
                     <div class="metric-grid">
                         <div class="metric-card">
-                            <div class="metric-value" id="traditional-avg">--</div>
-                            <div class="metric-label">Traditional ISP (ms)</div>
+                            <div class="metric-value" id="best-latency">--</div>
+                            <div class="metric-label">Best Route Performance</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-value" id="google-avg">--</div>
-                            <div class="metric-label">Google Backbone (ms)</div>
+                            <div class="metric-value" id="worst-latency">--</div>
+                            <div class="metric-label">Worst Route Performance</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-value" id="improvement-ms">--</div>
-                            <div class="metric-label">Improvement (ms)</div>
+                            <div class="metric-label">Max Improvement</div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-value" id="improvement-percent">--</div>
-                            <div class="metric-label">Improvement (%)</div>
+                            <div class="metric-label">Performance Gain</div>
                         </div>
-                    </div>
-
-                    <div class="results-container">
-                        <h3>🛠️ Configuration Options</h3>
-                        <p><strong>Manual Configuration:</strong> All route latencies in the left sidebar can be manually adjusted in real-time. Change any value and run tests to see immediate impact.</p>
-                        <p><strong>Auto-Optimization:</strong> Use the Auto-Optimization section to automatically test multiple configurations and find the optimal setup for your specific goals (latency, cost, or reliability).</p>
-                        <p><strong>Preset Configurations:</strong> Load pre-configured scenarios including AWS, Azure, Cloudflare, and multi-cloud alternatives for comparison.</p>
                     </div>
                     
                     <div class="results-container">
-                        <h3>🎯 Performance Summary</h3>
+                        <h3>🎯 Routing Performance Summary</h3>
                         <div id="summary-content">
-                            <p>Configure your routes manually in the sidebar or use auto-optimization, then run tests to see performance analysis...</p>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <div>
-                            📊 Chart visualization would appear here<br>
-                            (Run tests to see latency comparison charts)<br><br>
-                            <strong>Dynamic Testing Available:</strong><br>
-                            • Manually adjust any latency value<br>
-                            • Auto-optimize for different goals<br>
-                            • Load preset configurations<br>
-                            • Export results for analysis
+                            <p>Configure your routing endpoints and run tests to compare performance across different network paths...</p>
                         </div>
                     </div>
                 </div>
                 
                 <div id="detailed" class="tab-content">
                     <div class="results-container">
-                        <h3>📊 Detailed Test Results</h3>
+                        <h3>📊 Detailed Performance Metrics</h3>
                         <div id="detailed-results">
-                            <p>No test results available. Run tests to see detailed statistics.</p>
+                            <p>No test results available. Run tests to see detailed measurements for each routing path.</p>
                         </div>
                     </div>
                 </div>
                 
                 <div id="analysis" class="tab-content">
                     <div class="results-container">
-                        <h3>🔍 Advanced Analysis & Auto-Optimization</h3>
+                        <h3>🔍 Routing Optimization Analysis</h3>
                         <div id="analysis-content">
-                            <p><strong>Manual Testing:</strong> Use the sidebar controls to manually adjust any route configuration and immediately test the impact.</p>
-                            <p><strong>Auto-Optimization:</strong> Click "Auto-Optimize Routes" in the sidebar to automatically test multiple configurations and find the optimal setup for your goals.</p>
-                            <p><strong>Available Optimization Targets:</strong></p>
+                            <p>Run tests to see comprehensive analysis including:</p>
                             <ul>
-                                <li><strong>Minimize Latency:</strong> Find the configuration with the lowest overall latency</li>
-                                <li><strong>Optimize Cost/Performance:</strong> Balance latency improvement with infrastructure costs</li>
-                                <li><strong>Maximize Reliability:</strong> Focus on consistent performance with minimal variance</li>
-                            </ul>
-                            <p>Advanced analysis will appear here after running tests or optimization.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="reports" class="tab-content">
-                    <div class="results-container">
-                        <h3>📄 Report Generation & Recommendations</h3>
-                        <div class="metric-grid" style="margin-bottom: 20px;">
-                            <div class="metric-card">
-                                <button class="btn" onclick="generateExecutiveReport()" style="margin: 0;">📊 Executive Summary</button>
-                                <div class="metric-label">High-level business impact</div>
-                            </div>
-                            <div class="metric-card">
-                                <button class="btn" onclick="generateTechnicalReport()" style="margin: 0;">🔧 Technical Report</button>
-                                <div class="metric-label">Detailed implementation guide</div>
-                            </div>
-                            <div class="metric-card">
-                                <button class="btn" onclick="generateCostBenefitReport()" style="margin: 0;">💰 Cost-Benefit Analysis</button>
-                                <div class="metric-label">ROI and financial projections</div>
-                            </div>
-                            <div class="metric-card">
-                                <button class="btn" onclick="generateInfrastructureComparison()" style="margin: 0;">🔄 Infrastructure Comparison</button>
-                                <div class="metric-label">SSH vs Backbone evaluation</div>
-                            </div>
-                            <div class="metric-card">
-                                <button class="btn" onclick="generateRecommendations()" style="margin: 0;">🎯 Strategic Recommendations</button>
-                                <div class="metric-label">Expert analysis & guidance</div>
-                            </div>
-                        </div>
-                        <div id="report-content">
-                            <p>Select a report type above to generate comprehensive analysis and recommendations based on your test results.</p>
-                            <p><strong>Available Reports:</strong></p>
-                            <ul>
-                                <li><strong>Executive Summary:</strong> Business-focused overview with key metrics and ROI</li>
-                                <li><strong>Technical Report:</strong> Detailed implementation guidelines and configuration specs</li>
-                                <li><strong>Cost-Benefit Analysis:</strong> Financial impact assessment and budget projections</li>
-                                <li><strong>Infrastructure Comparison:</strong> SSH tunneling vs cloud backbone evaluation</li>
-                                <li><strong>Strategic Recommendations:</strong> Expert insights and prioritized action plans</li>
+                                <li><strong>Route Performance Ranking:</strong> Compare all tested paths</li>
+                                <li><strong>Consistency Analysis:</strong> Standard deviation and reliability metrics</li>
+                                <li><strong>Geographic Insights:</strong> Understand the impact of routing choices</li>
+                                <li><strong>Optimization Recommendations:</strong> Implementation guidance</li>
                             </ul>
                         </div>
                     </div>
@@ -689,11 +623,12 @@
                 <div id="logs" class="tab-content">
                     <div class="results-container">
                         <h3>📋 Test Execution Logs</h3>
-                        <button class="btn" onclick="analyzeLogsManually()" style="margin-bottom: 15px;">🔍 Analyze Optimization Results from Logs</button>
                         <div class="log-output" id="log-output">
-Welcome to Network Latency Testing Framework
-=============================================
-Ready to run tests...
+Geographic Routing Performance Testing Tool
+==========================================
+Ready to test routing performance across different network paths...
+
+Configure your routing scenarios and run tests to begin analysis.
                         </div>
                     </div>
                 </div>
@@ -705,981 +640,147 @@ Ready to run tests...
         // Global state
         let testResults = null;
         let isRunning = false;
-        let storedOptimalConfig = null; // Store optimal config globally
+        let routeCounter = 0;
 
-        // Report Generation and Recommendations System
-        class ReportGenerator {
-            constructor(testResults, optimizationResults = null) {
-                this.testResults = testResults;
-                this.optimizationResults = optimizationResults;
-                this.currentDate = new Date().toLocaleDateString();
-            }
-
-            generateExecutiveSummary() {
-                if (!this.testResults) {
-                    return '<p>No test data available. Please run tests first.</p>';
-                }
-
-                const improvement = this.testResults.improvements.googleVsTraditional;
-                const businessImpact = this.calculateBusinessImpact();
-                const roi = this.calculateROI();
-
-                return `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h3>📊 Executive Summary</h3>
-                            <div class="report-subtitle">Network Latency Optimization Analysis - ${this.currentDate}</div>
-                        </div>
-                        
-                        <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${improvement.absoluteMs}ms</div>
-                                <div class="metric-label">Latency Reduction</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${improvement.percentage}%</div>
-                                <div class="metric-label">Performance Improvement</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${businessImpact.annualSavings.toLocaleString()}</div>
-                                <div class="metric-label">Projected Annual Savings</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${roi.paybackMonths}</div>
-                                <div class="metric-label">Payback Period (months)</div>
-                            </div>
-                        </div>
-
-                        <h4>🎯 Key Findings</h4>
-                        <ul>
-                            <li><strong>Significant Performance Gain:</strong> Google Cloud backbone reduces latency by ${improvement.absoluteMs}ms (${improvement.percentage}%) compared to traditional ISP routing</li>
-                            <li><strong>Consistent Reliability:</strong> Standard deviation of ±${this.testResults.googleBackbone.stats.standardDeviation}ms provides predictable performance</li>
-                            <li><strong>Strong Business Case:</strong> Estimated annual productivity savings of ${businessImpact.annualSavings.toLocaleString()} with ${roi.paybackMonths}-month payback period</li>
-                            <li><strong>Scalable Solution:</strong> Performance benefits increase under high load conditions</li>
-                        </ul>
-
-                        <div class="roi-projection">
-                            <h4 style="margin: 0 0 10px 0;">💰 3-Year ROI Projection</h4>
-                            <div style="font-size: 1.2em;">
-                                <strong>Total Savings: ${(businessImpact.annualSavings * 3).toLocaleString()}</strong><br>
-                                <span style="font-size: 0.9em; opacity: 0.9;">Net Benefit: ${(businessImpact.annualSavings * 3 - roi.implementationCost).toLocaleString()}</span>
-                            </div>
-                        </div>
-
-                        <h4>🚀 Strategic Recommendations</h4>
-                        <div class="recommendation-card recommendation-high">
-                            <div class="priority-badge priority-high">HIGH PRIORITY</div>
-                            <strong>Immediate Implementation</strong><br>
-                            Deploy Google Cloud backbone routing for critical applications to capture immediate ${improvement.percentage}% performance improvement.
-                        </div>
-
-                        <div class="recommendation-card recommendation-medium">
-                            <div class="priority-badge priority-medium">MEDIUM PRIORITY</div>
-                            <strong>Pilot Program</strong><br>
-                            Start with high-impact services and monitor performance metrics for 30 days before full rollout.
-                        </div>
-
-                        <div class="export-options">
-                            <button class="btn btn-export" onclick="exportReport('executive', 'pdf')">📄 Export as PDF</button>
-                            <button class="btn btn-export" onclick="exportReport('executive', 'xlsx')">📊 Export as Excel</button>
-                            <button class="btn btn-export" onclick="exportReport('executive', 'json')">💾 Export as JSON</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            generateTechnicalReport() {
-                if (!this.testResults) {
-                    return '<p>No test data available. Please run tests first.</p>';
-                }
-
-                const config = this.testResults.config;
-                const reliability = this.calculateReliabilityMetrics();
-                const implementation = this.generateImplementationPlan();
-
-                return `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h3>🔧 Technical Implementation Report</h3>
-                            <div class="report-subtitle">Detailed Configuration and Deployment Guide - ${this.currentDate}</div>
-                        </div>
-
-                        <h4>📋 Current Configuration Analysis</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Route Segment</th><th>Traditional ISP</th><th>Google Backbone</th><th>Improvement</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>SA to Primary Hub</td>
-                                    <td>${config.sa_marseille}ms (Marseille)</td>
-                                    <td>${config.sa_google_pop}ms (Google JHB POP)</td>
-                                    <td class="highlight">${config.sa_marseille - config.sa_google_pop}ms faster</td>
-                                </tr>
-                                <tr>
-                                    <td>Primary to Destination Hub</td>
-                                    <td>${config.marseille_singapore + config.singapore_tokyo + config.tokyo_sydney}ms (Multi-hop)</td>
-                                    <td>${config.google_backbone}ms (Backbone)</td>
-                                    <td class="highlight">${(config.marseille_singapore + config.singapore_tokyo + config.tokyo_sydney) - config.google_backbone}ms faster</td>
-                                </tr>
-                                <tr>
-                                    <td>Final Hop to Auckland</td>
-                                    <td>${config.sydney_auckland}ms</td>
-                                    <td>${config.vm_auckland}ms</td>
-                                    <td class="highlight">${config.sydney_auckland - config.vm_auckland}ms faster</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <h4>🔬 Performance Metrics</h4>
-                        <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <div class="kpi-value">${this.testResults.googleBackbone.stats.average}ms</div>
-                                <div class="metric-label">Average Latency</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value">${this.testResults.googleBackbone.stats.min}-${this.testResults.googleBackbone.stats.max}ms</div>
-                                <div class="metric-label">Latency Range</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value">±${this.testResults.googleBackbone.stats.standardDeviation}ms</div>
-                                <div class="metric-label">Standard Deviation</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value">${reliability.consistency}%</div>
-                                <div class="metric-label">Consistency Score</div>
-                            </div>
-                        </div>
-
-                        <h4>🛠️ Implementation Plan</h4>
-                        ${implementation.map((step, index) => `
-                            <div class="implementation-step">
-                                <div class="step-number">${index + 1}</div>
-                                <div style="margin-left: 20px;">
-                                    <strong>${step.title}</strong><br>
-                                    ${step.description}<br>
-                                    <small style="color: #666;">Duration: ${step.duration} | Risk: ${step.risk}</small>
-                                </div>
-                            </div>
-                        `).join('')}
-
-                        <h4>⚠️ Risk Assessment & Mitigation</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Risk Category</th><th>Impact</th><th>Likelihood</th><th>Mitigation Strategy</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Network Latency Variance</td>
-                                    <td>Medium</td>
-                                    <td>Low</td>
-                                    <td>Continuous monitoring and SLA agreements</td>
-                                </tr>
-                                <tr>
-                                    <td>Service Dependency</td>
-                                    <td>High</td>
-                                    <td>Low</td>
-                                    <td>Fallback routing and redundancy planning</td>
-                                </tr>
-                                <tr>
-                                    <td>Cost Overrun</td>
-                                    <td>Medium</td>
-                                    <td>Medium</td>
-                                    <td>Usage monitoring and budget alerts</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="export-options">
-                            <button class="btn btn-export" onclick="exportReport('technical', 'pdf')">📄 Export as PDF</button>
-                            <button class="btn btn-export" onclick="exportReport('technical', 'docx')">📝 Export as Word</button>
-                            <button class="btn btn-export" onclick="exportReport('technical', 'json')">💾 Export as JSON</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            generateCostBenefitReport() {
-                if (!this.testResults) {
-                    return '<p>No test data available. Please run tests first.</p>';
-                }
-
-                const costAnalysis = this.calculateDetailedCostAnalysis();
-                const businessValue = this.calculateBusinessValue();
-
-                return `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h3>💰 Cost-Benefit Analysis</h3>
-                            <div class="report-subtitle">Financial Impact Assessment - ${this.currentDate}</div>
-                        </div>
-
-                        <h4>💵 Implementation Costs</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Cost Category</th><th>One-time</th><th>Monthly</th><th>Annual</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Google Cloud VM (e2-small)</td>
-                                    <td>$0</td>
-                                    <td>${costAnalysis.vmCost}</td>
-                                    <td>${costAnalysis.vmCost * 12}</td>
-                                </tr>
-                                <tr>
-                                    <td>Data Transfer (estimated)</td>
-                                    <td>$0</td>
-                                    <td>${costAnalysis.transferCost}</td>
-                                    <td>${costAnalysis.transferCost * 12}</td>
-                                </tr>
-                                <tr>
-                                    <td>Setup & Configuration</td>
-                                    <td>${costAnalysis.setupCost}</td>
-                                    <td>$0</td>
-                                    <td>$0</td>
-                                </tr>
-                                <tr>
-                                    <td>Monitoring & Maintenance</td>
-                                    <td>$0</td>
-                                    <td>${costAnalysis.maintenanceCost}</td>
-                                    <td>${costAnalysis.maintenanceCost * 12}</td>
-                                </tr>
-                                <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                    <td>Total</td>
-                                    <td>${costAnalysis.totalOneTime}</td>
-                                    <td>${costAnalysis.totalMonthly}</td>
-                                    <td>${costAnalysis.totalAnnual}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <h4>📈 Business Value Calculation</h4>
-                        <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${this.testResults.improvements.googleVsTraditional.absoluteMs}ms</div>
-                                <div class="metric-label">Latency Reduction per Request</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${businessValue.requestsPerDay.toLocaleString()}</div>
-                                <div class="metric-label">Est. Daily Requests</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${businessValue.timesSavedHours}/day</div>
-                                <div class="metric-label">Time Saved (hours)</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${businessValue.productivityValue.toLocaleString()}</div>
-                                <div class="metric-label">Daily Productivity Value</div>
-                            </div>
-                        </div>
-
-                        <h4>📊 ROI Analysis</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Period</th><th>Costs</th><th>Benefits</th><th>Net Benefit</th><th>ROI</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Year 1</td>
-                                    <td>${(costAnalysis.totalOneTime + costAnalysis.totalAnnual).toLocaleString()}</td>
-                                    <td>${(businessValue.annualValue).toLocaleString()}</td>
-                                    <td class="kpi-positive">${(businessValue.annualValue - costAnalysis.totalOneTime - costAnalysis.totalAnnual).toLocaleString()}</td>
-                                    <td class="kpi-positive">${Math.round(((businessValue.annualValue - costAnalysis.totalOneTime - costAnalysis.totalAnnual) / (costAnalysis.totalOneTime + costAnalysis.totalAnnual)) * 100)}%</td>
-                                </tr>
-                                <tr>
-                                    <td>Year 2</td>
-                                    <td>${costAnalysis.totalAnnual.toLocaleString()}</td>
-                                    <td>${businessValue.annualValue.toLocaleString()}</td>
-                                    <td class="kpi-positive">${(businessValue.annualValue - costAnalysis.totalAnnual).toLocaleString()}</td>
-                                    <td class="kpi-positive">${Math.round(((businessValue.annualValue - costAnalysis.totalAnnual) / costAnalysis.totalAnnual) * 100)}%</td>
-                                </tr>
-                                <tr>
-                                    <td>Year 3</td>
-                                    <td>${costAnalysis.totalAnnual.toLocaleString()}</td>
-                                    <td>${businessValue.annualValue.toLocaleString()}</td>
-                                    <td class="kpi-positive">${(businessValue.annualValue - costAnalysis.totalAnnual).toLocaleString()}</td>
-                                    <td class="kpi-positive">${Math.round(((businessValue.annualValue - costAnalysis.totalAnnual) / costAnalysis.totalAnnual) * 100)}%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="roi-projection">
-                            <h4 style="margin: 0 0 10px 0;">🎯 Break-even Analysis</h4>
-                            <div style="font-size: 1.2em;">
-                                <strong>Break-even Point: ${Math.ceil((costAnalysis.totalOneTime + costAnalysis.totalAnnual) / (businessValue.annualValue / 12))} months</strong><br>
-                                <span style="font-size: 0.9em; opacity: 0.9;">3-Year Net Benefit: ${((businessValue.annualValue * 3) - (costAnalysis.totalOneTime + costAnalysis.totalAnnual * 3)).toLocaleString()}</span>
-                            </div>
-                        </div>
-
-                        <h4>💡 Financial Recommendations</h4>
-                        <div class="recommendation-card recommendation-high">
-                            <div class="priority-badge priority-high">STRONG BUSINESS CASE</div>
-                            <strong>Immediate Approval Recommended</strong><br>
-                            ROI exceeds 200% in first year with break-even in ${Math.ceil((costAnalysis.totalOneTime + costAnalysis.totalAnnual) / (businessValue.annualValue / 12))} months. Low implementation risk with high returns.
-                        </div>
-
-                        <div class="export-options">
-                            <button class="btn btn-export" onclick="exportReport('financial', 'pdf')">📄 Export as PDF</button>
-                            <button class="btn btn-export" onclick="exportReport('financial', 'xlsx')">📊 Export as Excel</button>
-                            <button class="btn btn-export" onclick="exportReport('financial', 'pptx')">📋 Export as PowerPoint</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            generateSmartRecommendations() {
-                if (!this.testResults) {
-                    return '<p>No test data available. Please run tests first.</p>';
-                }
-
-                const insights = this.generateExpertInsights();
-                const actionPlan = this.generateActionPlan();
-                const monitoring = this.generateMonitoringPlan();
-
-                return `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h3>🎯 Strategic Recommendations</h3>
-                            <div class="report-subtitle">Expert Analysis and Strategic Guidance - ${this.currentDate}</div>
-                        </div>
-
-                        <h4>🧠 Expert-Generated Insights</h4>
-                        ${insights.map(insight => `
-                            <div class="recommendation-card recommendation-${insight.priority.toLowerCase()}">
-                                <div class="priority-badge priority-${insight.priority.toLowerCase()}">${insight.priority.toUpperCase()} PRIORITY</div>
-                                <strong>${insight.title}</strong><br>
-                                ${insight.description}<br>
-                                <small style="color: #666;"><strong>Impact:</strong> ${insight.impact} | <strong>Effort:</strong> ${insight.effort}</small>
-                            </div>
-                        `).join('')}
-
-                        <h4>📋 Prioritized Action Plan</h4>
-                        ${actionPlan.map((action, index) => `
-                            <div class="implementation-step">
-                                <div class="step-number">${index + 1}</div>
-                                <div style="margin-left: 20px;">
-                                    <strong>${action.action}</strong><br>
-                                    ${action.description}<br>
-                                    <small style="color: #666;">Timeline: ${action.timeline} | Owner: ${action.owner} | Success Metric: ${action.metric}</small>
-                                </div>
-                            </div>
-                        `).join('')}
-
-                        <h4>📊 Monitoring & Success Metrics</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Monitoring Frequency</th></tr>
-                            </thead>
-                            <tbody>
-                                ${monitoring.map(metric => `
-                                    <tr>
-                                        <td>${metric.name}</td>
-                                        <td>${metric.baseline}</td>
-                                        <td class="kpi-positive">${metric.target}</td>
-                                        <td>${metric.frequency}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-
-                        <h4>🚨 Risk Alerts & Contingencies</h4>
-                        <div class="recommendation-card recommendation-medium">
-                            <div class="priority-badge priority-medium">MONITORING REQUIRED</div>
-                            <strong>Performance Degradation Alert</strong><br>
-                            If latency increases by >15% from baseline, trigger automatic fallback to traditional routing while investigating root cause.
-                        </div>
-
-                        <div class="recommendation-card recommendation-low">
-                            <div class="priority-badge priority-low">FUTURE CONSIDERATION</div>
-                            <strong>Multi-Cloud Strategy</strong><br>
-                            Consider AWS Global Accelerator or Azure Front Door as alternative/backup solutions for geographic redundancy.
-                        </div>
-
-                        <h4>🔮 Future Optimization Opportunities</h4>
-                        <ul>
-                            <li><strong>Edge Computing:</strong> Deploy edge servers in Cape Town for sub-10ms local latency</li>
-                            <li><strong>CDN Integration:</strong> Implement Cloudflare or similar CDN for static content optimization</li>
-                            <li><strong>Protocol Optimization:</strong> Explore HTTP/3 and QUIC protocols for further latency reduction</li>
-                            <li><strong>Dynamic Routing:</strong> Implement intelligent routing based on real-time network conditions</li>
-                        </ul>
-
-                        <div class="export-options">
-                            <button class="btn btn-export" onclick="exportReport('recommendations', 'pdf')">📄 Export as PDF</button>
-                            <button class="btn btn-export" onclick="exportReport('recommendations', 'docx')">📝 Export as Word</button>
-                            <button class="btn btn-export" onclick="exportReport('recommendations', 'json')">💾 Export as JSON</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            generateInfrastructureComparison() {
-                if (!this.testResults) {
-                    return '<p>No test data available. Please run tests first.</p>';
-                }
-
-                const currentImprovement = this.testResults.improvements.googleVsTraditional.absoluteMs;
-                const sshOverheadEstimate = Math.round(currentImprovement * 0.1); // 10% overhead
-                const sshNetImprovement = currentImprovement - sshOverheadEstimate;
-                const evaluationMatrix = this.generateEvaluationMatrix();
-                const phaseStrategy = this.generatePhaseStrategy();
-
-                return `
-                    <div class="report-section">
-                        <div class="report-header">
-                            <h3>🔄 Infrastructure Comparison</h3>
-                            <div class="report-subtitle">Direct SSH vs Google Cloud Backbone Evaluation - ${this.currentDate}</div>
-                        </div>
-
-                        <h4>📊 Performance Impact Analysis</h4>
-                        <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${currentImprovement}ms</div>
-                                <div class="metric-label">Current Backbone Improvement</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-warning">${sshNetImprovement}ms</div>
-                                <div class="metric-label">Estimated SSH Net Improvement</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-negative">${sshOverheadEstimate}ms</div>
-                                <div class="metric-label">SSH Overhead Cost</div>
-                            </div>
-                            <div class="kpi-card">
-                                <div class="kpi-value kpi-positive">${Math.round((sshNetImprovement/this.testResults.traditional.stats.average)*100)}%</div>
-                                <div class="metric-label">SSH Still Improves By</div>
-                            </div>
-                        </div>
-
-                        <h4>🎯 Comprehensive Evaluation Matrix</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Dimension</th><th>Direct SSH</th><th>Google Backbone</th><th>Winner</th></tr>
-                            </thead>
-                            <tbody>
-                                ${evaluationMatrix.map(item => `
-                                    <tr>
-                                        <td><strong>${item.dimension}</strong></td>
-                                        <td>${item.ssh}</td>
-                                        <td>${item.backbone}</td>
-                                        <td class="${item.winner === 'SSH' ? 'kpi-positive' : item.winner === 'Backbone' ? 'kpi-negative' : ''}">${item.winner}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-
-                        <h4>💰 Cost Comparison (12 months)</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr><th>Cost Factor</th><th>Direct SSH</th><th>Google Backbone</th><th>Savings</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Setup Cost</td>
-                                    <td class="kpi-positive">$0</td>
-                                    <td>$2,500</td>
-                                    <td class="kpi-positive">$2,500</td>
-                                </tr>
-                                <tr>
-                                    <td>Monthly Infrastructure</td>
-                                    <td class="kpi-positive">$35</td>
-                                    <td>$185</td>
-                                    <td class="kpi-positive">$150/month</td>
-                                </tr>
-                                <tr>
-                                    <td>Annual Total</td>
-                                    <td class="kpi-positive">$420</td>
-                                    <td>$4,720</td>
-                                    <td class="kpi-positive">$4,300/year</td>
-                                </tr>
-                                <tr>
-                                    <td>Operational Overhead</td>
-                                    <td class="kpi-warning">Your time</td>
-                                    <td class="kpi-positive">Managed</td>
-                                    <td>Depends on valuation</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <h4>🎪 Recommended Phased Strategy</h4>
-                        ${phaseStrategy.map((phase, index) => `
-                            <div class="implementation-step">
-                                <div class="step-number">${index + 1}</div>
-                                <div style="margin-left: 20px;">
-                                    <strong>${phase.title}</strong> (${phase.duration})<br>
-                                    ${phase.description}<br>
-                                    <small style="color: #666;"><strong>Goal:</strong> ${phase.goal} | <strong>Cost:</strong> ${phase.cost}</small>
-                                </div>
-                            </div>
-                        `).join('')}
-
-                        <h4>🎯 Decision Framework</h4>
-                        <div class="recommendation-card recommendation-high">
-                            <div class="priority-badge priority-high">CHOOSE SSH IF</div>
-                            <strong>Short-term, budget-conscious approach</strong><br>
-                            • Small scale (&lt;50 users) • Budget is primary concern • High technical comfort • 6-18 month timeline
-                        </div>
-
-                        <div class="recommendation-card recommendation-medium">
-                            <div class="priority-badge priority-medium">CHOOSE BACKBONE IF</div>
-                            <strong>Enterprise-grade, long-term solution</strong><br>
-                            • Growing traffic • Need 99.5%+ uptime • Multiple locations • Professional SLAs required • 2+ year strategic plan
-                        </div>
-
-                        <div class="recommendation-card recommendation-low">
-                            <div class="priority-badge priority-low">HYBRID APPROACH</div>
-                            <strong>Best of both worlds</strong><br>
-                            Start with SSH to validate ROI (Phase 1), then migrate to backbone when business case is proven (Phase 2).
-                        </div>
-
-                        <div class="export-options">
-                            <button class="btn btn-export" onclick="exportReport('infrastructure', 'pdf')">📄 Export as PDF</button>
-                            <button class="btn btn-export" onclick="exportReport('infrastructure', 'xlsx')">📊 Export as Excel</button>
-                            <button class="btn btn-export" onclick="exportReport('infrastructure', 'json')">💾 Export as JSON</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Helper methods for calculations
-            calculateBusinessImpact() {
-                const latencyReduction = this.testResults.improvements.googleVsTraditional.absoluteMs;
-                const estimatedRequestsPerDay = 10000; // Configurable based on usage
-                const averageUserValue = 50; // USD per hour
-                
-                const dailyTimeSaved = (latencyReduction * estimatedRequestsPerDay) / (1000 * 3600); // Convert to hours
-                const dailyValue = dailyTimeSaved * averageUserValue;
-                const annualSavings = Math.round(dailyValue * 365);
-
-                return {
-                    latencyReduction,
-                    estimatedRequestsPerDay,
-                    dailyTimeSaved: dailyTimeSaved.toFixed(2),
-                    dailyValue: Math.round(dailyValue),
-                    annualSavings
-                };
-            }
-
-            calculateROI() {
-                const annualSavings = this.calculateBusinessImpact().annualSavings;
-                const implementationCost = 2500; // One-time setup
-                const annualCost = 1200; // Annual operating cost
-
-                const paybackMonths = Math.ceil((implementationCost + annualCost) / (annualSavings / 12));
-
-                return {
-                    annualSavings,
-                    implementationCost,
-                    annualCost,
-                    paybackMonths,
-                    threeYearROI: Math.round(((annualSavings * 3 - implementationCost - annualCost * 3) / (implementationCost + annualCost * 3)) * 100)
-                };
-            }
-
-            calculateReliabilityMetrics() {
-                const stats = this.testResults.googleBackbone.stats;
-                const consistency = Math.max(0, 100 - (stats.standardDeviation / stats.average * 100));
-                
-                return {
-                    consistency: Math.round(consistency),
-                    reliability: consistency > 85 ? 'High' : consistency > 70 ? 'Medium' : 'Low',
-                    coefficient: (stats.standardDeviation / stats.average * 100).toFixed(2)
-                };
-            }
-
-            generateImplementationPlan() {
-                return [
+        // Preset routing scenarios
+        const presetScenarios = {
+            'sa-au-nz': {
+                description: 'Testing SA→AU→NZ routing: Compare traditional ISP routing via Europe vs Google Cloud backbone routing via Australia',
+                routes: [
                     {
-                        title: "Infrastructure Assessment",
-                        description: "Evaluate current network architecture and identify integration points for Google Cloud routing.",
-                        duration: "1-2 weeks",
-                        risk: "Low"
+                        name: 'Traditional Route (Europe)',
+                        url: 'https://jsonplaceholder.typicode.com/posts/1',
+                        type: 'traditional',
+                        description: 'ISP routing via European hubs',
+                        enabled: true
                     },
                     {
-                        title: "Google Cloud Setup",
-                        description: "Deploy VM instance in Sydney region and configure network routing through JHB POP.",
-                        duration: "3-5 days",
-                        risk: "Low"
+                        name: 'Google Cloud Australia',
+                        url: 'https://www.googleapis.com/storage/v1/b',
+                        type: 'optimized',
+                        description: 'Google backbone via Australia',
+                        enabled: true
                     },
                     {
-                        title: "Routing Configuration",
-                        description: "Update DNS, configure traffic routing, and implement monitoring systems.",
-                        duration: "1 week",
-                        risk: "Medium"
+                        name: 'CDN Australia',
+                        url: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
+                        type: 'reference',
+                        description: 'CDN with Australian PoP',
+                        enabled: true
                     },
                     {
-                        title: "Testing & Validation",
-                        description: "Comprehensive testing with gradual traffic migration and performance validation.",
-                        duration: "2 weeks",
-                        risk: "Low"
-                    },
-                    {
-                        title: "Production Deployment",
-                        description: "Full production rollout with monitoring and rollback procedures in place.",
-                        duration: "1 week",
-                        risk: "Medium"
+                        name: 'Alternative Endpoint',
+                        url: 'https://httpbin.org/delay/0',
+                        type: 'reference',
+                        description: 'CORS-friendly test endpoint',
+                        enabled: false
                     }
-                ];
-            }
+                ],
+                visualization: `
+<strong>SCENARIO: SA→AU→NZ Routing Optimization</strong>
 
-            calculateDetailedCostAnalysis() {
-                return {
-                    vmCost: 35,
-                    transferCost: 50,
-                    setupCost: 2500,
-                    maintenanceCost: 100,
-                    totalOneTime: 2500,
-                    totalMonthly: 185,
-                    totalAnnual: 2220
-                };
-            }
+<span style="color: #c62828; font-weight: bold;">🔴 TRADITIONAL ISP ROUTING:</span>
+South Africa → ISP → Europe (Marseille) → Asia Pacific → Australia/New Zealand
 
-            calculateBusinessValue() {
-                const requestsPerDay = 10000;
-                const latencyReduction = this.testResults.improvements.googleVsTraditional.absoluteMs;
-                const timesSavedHours = ((latencyReduction * requestsPerDay) / (1000 * 3600)).toFixed(1);
-                const productivityValue = Math.round(parseFloat(timesSavedHours) * 50);
-                const annualValue = productivityValue * 365;
-
-                return {
-                    requestsPerDay,
-                    timesSavedHours,
-                    productivityValue,
-                    annualValue
-                };
-            }
-
-            generateAIInsights() {
-                const improvement = this.testResults.improvements.googleVsTraditional.percentage;
-                const consistency = this.calculateReliabilityMetrics().consistency;
-
-                const insights = [
+<span style="color: #2e7d32; font-weight: bold;">🟢 OPTIMIZED ROUTING (Google Cloud):</span>
+South Africa → Google POP → Google Backbone → Australia VM → New Zealand
+                `
+            },
+            'us-eu': {
+                description: 'Testing US→EU routing: Compare transatlantic routing options and CDN performance',
+                routes: [
                     {
-                        title: "Exceptional Performance Improvement",
-                        description: `${improvement}% latency reduction significantly exceeds industry standards for network optimization (typically 10-20%). This positions your infrastructure in the top 5% of optimized networks.`,
-                        priority: improvement > 40 ? "high" : improvement > 25 ? "medium" : "low",
-                        impact: "High",
-                        effort: "Medium"
+                        name: 'US East Coast',
+                        url: 'https://api.github.com',
+                        type: 'reference',
+                        description: 'US-based API endpoint',
+                        enabled: true
                     },
                     {
-                        title: "Reliability Excellence",
-                        description: `${consistency}% consistency score indicates ${consistency > 85 ? 'excellent' : consistency > 70 ? 'good' : 'adequate'} network stability. This provides predictable user experience and supports SLA commitments.`,
-                        priority: consistency > 85 ? "high" : "medium",
-                        impact: "Medium",
-                        effort: "Low"
+                        name: 'EU Central',
+                        url: 'https://httpbin.org/delay/0',
+                        type: 'reference',
+                        description: 'European endpoint',
+                        enabled: true
                     },
                     {
-                        title: "Cost-Effectiveness Analysis",
-                        description: "Current configuration provides optimal cost-performance ratio. Consider scaling to handle increased traffic volumes without proportional latency increases.",
-                        priority: "medium",
-                        impact: "Medium",
-                        effort: "Low"
+                        name: 'Global CDN',
+                        url: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
+                        type: 'optimized',
+                        description: 'Global CDN network',
+                        enabled: true
                     }
-                ];
+                ],
+                visualization: `
+<strong>SCENARIO: US→EU Routing Performance</strong>
 
-                return insights;
-            }
+<span style="color: #c62828; font-weight: bold;">🔴 DIRECT ROUTING:</span>
+Source → ISP → Transatlantic Cable → European ISP → Destination
 
-            generateExpertInsights() {
-                const improvement = this.testResults.improvements.googleVsTraditional.percentage;
-                const consistency = this.calculateReliabilityMetrics().consistency;
-
-                const insights = [
+<span style="color: #2e7d32; font-weight: bold;">🟢 CDN ROUTING:</span>
+Source → Nearest CDN POP → CDN Backbone → European POP → Cache/Origin
+                `
+            },
+            'asia-pacific': {
+                description: 'Testing Asia Pacific routing: Compare intra-regional vs international routing paths',
+                routes: [
                     {
-                        title: "Exceptional Performance Improvement",
-                        description: `${improvement}% latency reduction significantly exceeds industry standards for network optimization (typically 10-20%). This positions your infrastructure in the top 5% of optimized networks.`,
-                        priority: improvement > 40 ? "high" : improvement > 25 ? "medium" : "low",
-                        impact: "High",
-                        effort: "Medium"
+                        name: 'Singapore Hub',
+                        url: 'https://httpbin.org/delay/0',
+                        type: 'reference',
+                        description: 'Singapore-based endpoint',
+                        enabled: true
                     },
                     {
-                        title: "Reliability Excellence",
-                        description: `${consistency}% consistency score indicates ${consistency > 85 ? 'excellent' : consistency > 70 ? 'good' : 'adequate'} network stability. This provides predictable user experience and supports SLA commitments.`,
-                        priority: consistency > 85 ? "high" : "medium",
-                        impact: "Medium",
-                        effort: "Low"
+                        name: 'Tokyo Hub',
+                        url: 'https://api.github.com',
+                        type: 'reference',
+                        description: 'Japan-based endpoint',
+                        enabled: true
                     },
                     {
-                        title: "Cost-Effectiveness Analysis",
-                        description: "Current configuration provides optimal cost-performance ratio. Consider scaling to handle increased traffic volumes without proportional latency increases.",
-                        priority: "medium",
-                        impact: "Medium",
-                        effort: "Low"
-                    },
-                    {
-                        title: "Infrastructure Strategy Decision Point",
-                        description: "With proven 266ms improvement, you now have data to make informed infrastructure decisions. Consider direct SSH for short-term savings or backbone for long-term scalability.",
-                        priority: "high",
-                        impact: "High",
-                        effort: "High"
+                        name: 'Australia Hub',
+                        url: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
+                        type: 'optimized',
+                        description: 'Australian endpoint',
+                        enabled: true
                     }
-                ];
+                ],
+                visualization: `
+<strong>SCENARIO: Asia Pacific Regional Routing</strong>
 
-                return insights;
-            }
+<span style="color: #1565c0; font-weight: bold;">🔗 REGIONAL HUBS:</span>
+Source → Regional ISP → Singapore/Tokyo/Sydney Hub → Destination
 
-            generateEvaluationMatrix() {
-                return [
+<span style="color: #2e7d32; font-weight: bold;">🟢 OPTIMIZED PATHS:</span>
+Source → Submarine Cable → Direct Regional Connection → Destination
+                `
+            },
+            'custom': {
+                description: 'Custom routing scenario - configure your own endpoints and routing paths',
+                routes: [
                     {
-                        dimension: "Performance & Latency",
-                        ssh: "Current improvement - 10% overhead",
-                        backbone: "Full optimized performance",
-                        winner: "Backbone"
-                    },
-                    {
-                        dimension: "Reliability & Uptime",
-                        ssh: "Single point of failure",
-                        backbone: "Redundant enterprise infrastructure",
-                        winner: "Backbone"
-                    },
-                    {
-                        dimension: "Scalability",
-                        ssh: "Limited by tunnel bandwidth",
-                        backbone: "Auto-scaling cloud infrastructure",
-                        winner: "Backbone"
-                    },
-                    {
-                        dimension: "Initial Cost",
-                        ssh: "$0 setup, $35/month",
-                        backbone: "$2,500 setup, $185/month",
-                        winner: "SSH"
-                    },
-                    {
-                        dimension: "Operational Complexity",
-                        ssh: "Manual management required",
-                        backbone: "Fully managed service",
-                        winner: "Backbone"
-                    },
-                    {
-                        dimension: "Time to Deploy",
-                        ssh: "Immediate (already configured)",
-                        backbone: "2-4 weeks implementation",
-                        winner: "SSH"
-                    },
-                    {
-                        dimension: "Professional Support",
-                        ssh: "DIY troubleshooting",
-                        backbone: "24/7 enterprise support",
-                        winner: "Backbone"
-                    },
-                    {
-                        dimension: "Exit Strategy",
-                        ssh: "Easy (stop tunneling)",
-                        backbone: "Moderate (config changes)",
-                        winner: "SSH"
+                        name: 'Custom Route 1',
+                        url: 'https://example.com',
+                        type: 'custom',
+                        description: 'Your custom endpoint',
+                        enabled: false
                     }
-                ];
+                ],
+                visualization: `
+<strong>CUSTOM SCENARIO: Define Your Own Routing Test</strong>
+
+Configure your specific routing endpoints and network paths below.
+Add multiple routes to compare different infrastructure options.
+                `
             }
+        };
 
-            generatePhaseStrategy() {
-                return [
-                    {
-                        title: "Phase 1: SSH Validation",
-                        duration: "0-6 months",
-                        description: "Implement direct SSH tunneling to validate performance improvements and build business case with minimal investment.",
-                        goal: "Prove concept with real users",
-                        cost: "$35/month"
-                    },
-                    {
-                        title: "Phase 2: Business Case Development",
-                        duration: "3-6 months",
-                        description: "Collect performance metrics, user feedback, and ROI data to justify backbone investment.",
-                        goal: "Quantify business value",
-                        cost: "Analysis time"
-                    },
-                    {
-                        title: "Phase 3: Backbone Migration",
-                        duration: "6-12 months",
-                        description: "Implement Google Cloud backbone with professional setup, monitoring, and gradual traffic migration.",
-                        goal: "Enterprise-grade reliability",
-                        cost: "$2,500 + $185/month"
-                    },
-                    {
-                        title: "Phase 4: Scale & Optimize",
-                        duration: "12+ months",
-                        description: "Leverage proven infrastructure for expansion, new applications, and advanced optimizations.",
-                        goal: "Strategic platform for growth",
-                        cost: "Variable with scale"
-                    }
-                ];
-            }
-
-            generateActionPlan() {
-                return [
-                    {
-                        action: "Implement Production Deployment",
-                        description: "Deploy Google Cloud backbone routing for production traffic with comprehensive monitoring.",
-                        timeline: "2-4 weeks",
-                        owner: "Infrastructure Team",
-                        metric: "Latency reduction achieved"
-                    },
-                    {
-                        action: "Establish Performance Monitoring",
-                        description: "Set up real-time monitoring dashboard and automated alerting for latency degradation.",
-                        timeline: "1 week",
-                        owner: "DevOps Team",
-                        metric: "100% uptime monitoring"
-                    },
-                    {
-                        action: "Document Procedures",
-                        description: "Create operational runbooks and disaster recovery procedures for routing configuration.",
-                        timeline: "2 weeks",
-                        owner: "Technical Writing",
-                        metric: "Complete documentation"
-                    },
-                    {
-                        action: "Capacity Planning",
-                        description: "Analyze traffic patterns and plan for scaling Google Cloud resources based on growth projections.",
-                        timeline: "Ongoing",
-                        owner: "Architecture Team",
-                        metric: "Scalability assessment"
-                    }
-                ];
-            }
-
-            generateMonitoringPlan() {
-                return [
-                    {
-                        name: "Average Latency",
-                        baseline: `${this.testResults.traditional.stats.average}ms`,
-                        target: `<${this.testResults.googleBackbone.stats.average + 10}ms`,
-                        frequency: "Real-time"
-                    },
-                    {
-                        name: "Latency Consistency",
-                        baseline: `±${this.testResults.traditional.stats.standardDeviation}ms`,
-                        target: `<±${this.testResults.googleBackbone.stats.standardDeviation + 5}ms`,
-                        frequency: "Hourly"
-                    },
-                    {
-                        name: "Availability",
-                        baseline: "99.0%",
-                        target: ">99.9%",
-                        frequency: "Real-time"
-                    },
-                    {
-                        name: "Cost per GB",
-                        baseline: "$0.08",
-                        target: "<$0.10",
-                        frequency: "Daily"
-                    }
-                ];
-            }
-        }
-
-        // Report generation functions
-        function generateExecutiveReport() {
-            if (!testResults) {
-                alert('No test results available. Please run tests first.');
-                return;
-            }
-            
-            const generator = new ReportGenerator(testResults);
-            const content = generator.generateExecutiveSummary();
-            
-            document.getElementById('report-content').innerHTML = content;
-            showTab('reports');
-        }
-
-        function generateTechnicalReport() {
-            if (!testResults) {
-                alert('No test results available. Please run tests first.');
-                return;
-            }
-            
-            const generator = new ReportGenerator(testResults);
-            const content = generator.generateTechnicalReport();
-            
-            document.getElementById('report-content').innerHTML = content;
-            showTab('reports');
-        }
-
-        function generateCostBenefitReport() {
-            if (!testResults) {
-                alert('No test results available. Please run tests first.');
-                return;
-            }
-            
-            const generator = new ReportGenerator(testResults);
-            const content = generator.generateCostBenefitReport();
-            
-            document.getElementById('report-content').innerHTML = content;
-            showTab('reports');
-        }
-
-        function generateRecommendations() {
-            if (!testResults) {
-                alert('No test results available. Please run tests first.');
-                return;
-            }
-            
-            const generator = new ReportGenerator(testResults);
-            const content = generator.generateSmartRecommendations();
-            
-            document.getElementById('report-content').innerHTML = content;
-            showTab('reports');
-        }
-
-        function exportReport(reportType, format) {
-            // Generate export data
-            const generator = new ReportGenerator(testResults);
-            let reportContent, filename;
-            
-            switch(reportType) {
-                case 'executive':
-                    reportContent = generator.generateExecutiveSummary();
-                    filename = `executive-summary-${new Date().toISOString().slice(0, 10)}`;
-                    break;
-                case 'technical':
-                    reportContent = generator.generateTechnicalReport();
-                    filename = `technical-report-${new Date().toISOString().slice(0, 10)}`;
-                    break;
-                case 'financial':
-                    reportContent = generator.generateCostBenefitReport();
-                    filename = `cost-benefit-analysis-${new Date().toISOString().slice(0, 10)}`;
-                    break;
-                case 'recommendations':
-                    reportContent = generator.generateSmartRecommendations();
-                    filename = `recommendations-${new Date().toISOString().slice(0, 10)}`;
-                    break;
-                default:
-                    reportContent = 'Report data';
-                    filename = `network-report-${new Date().toISOString().slice(0, 10)}`;
-            }
-
-            // For demo purposes, export as text/JSON
-            const exportData = {
-                reportType: reportType,
-                generatedAt: new Date().toISOString(),
-                format: format,
-                testResults: testResults,
-                reportContent: reportContent.replace(/<[^>]*>/g, ''), // Strip HTML for text export
-                metadata: {
-                    improvement: testResults.improvements.googleVsTraditional,
-                    configuration: testResults.config,
-                    reliability: generator.calculateReliabilityMetrics(),
-                    businessImpact: generator.calculateBusinessImpact(),
-                    roi: generator.calculateROI()
-                }
-            };
-
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${filename}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert(`${reportType.charAt(0).toUpperCase() + reportType.slice(1)} report exported successfully as ${format.toUpperCase()}!`);
-        }
-
-        // Network Latency Testing Framework Class
-        class NetworkLatencyTester {
-            constructor(config) {
-                this.config = config;
+        // Network Performance Tester Class - Generic Version
+        class RoutingPerformanceTester {
+            constructor() {
                 this.logs = [];
+                this.results = {};
             }
 
             log(message) {
@@ -1692,1022 +793,720 @@ Ready to run tests...
                 logOutput.scrollTop = logOutput.scrollHeight;
             }
 
-            addVariance(base, factor) {
-                return Math.round(base * (1 + (Math.random() - 0.5) * factor));
-            }
-
-            testTraditionalRouting() {
-                const hops = [
-                    this.addVariance(this.config.sa_marseille, this.config.variance),
-                    this.addVariance(this.config.marseille_singapore, this.config.variance),
-                    this.addVariance(this.config.singapore_tokyo, this.config.variance),
-                    this.addVariance(this.config.tokyo_sydney, this.config.variance),
-                    this.addVariance(this.config.sydney_auckland, this.config.variance)
-                ];
-                return hops.reduce((sum, hop) => sum + hop, 0);
-            }
-
-            testGoogleBackbone() {
-                const hops = [
-                    this.addVariance(this.config.sa_google_pop, this.config.variance * 0.5),
-                    this.addVariance(this.config.google_backbone, this.config.variance * 0.5),
-                    this.addVariance(this.config.vm_auckland, this.config.variance * 0.5)
-                ];
-                return hops.reduce((sum, hop) => sum + hop, 0);
-            }
-
-            testDirectRouting() {
-                return this.addVariance(520, this.config.variance * 1.5); // Direct SA to NZ
-            }
-
-            calculateStats(values) {
-                const sorted = [...values].sort((a, b) => a - b);
-                const avg = values.reduce((a, b) => a + b, 0) / values.length;
-                const variance = values.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / values.length;
+            async measureLatency(url, timeout = 15000) {
+                const startTime = performance.now();
                 
-                return {
-                    min: Math.min(...values),
-                    max: Math.max(...values),
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeout);
+                    
+                    const response = await fetch(url, {
+                        method: 'HEAD',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        signal: controller.signal,
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const endTime = performance.now();
+                    const latency = Math.round(endTime - startTime);
+                    
+                    return {
+                        success: true,
+                        latency: latency,
+                        status: response.status,
+                        url: url
+                    };
+                    
+                } catch (error) {
+                    const endTime = performance.now();
+                    const latency = Math.round(endTime - startTime);
+                    
+                    return {
+                        success: false,
+                        latency: latency,
+                        error: error.message,
+                        url: url
+                    };
+                }
+            }
+
+            async testEndpoint(name, url, iterations, timeout) {
+                this.log(`Testing ${name}: ${url}`);
+                const results = [];
+                
+                for (let i = 0; i < iterations; i++) {
+                    this.log(`  → ${name} test ${i + 1}/${iterations}`);
+                    
+                    const result = await this.measureLatency(url, timeout);
+                    results.push(result);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    this.updateEndpointStatus(name, `Testing... ${i + 1}/${iterations}`, 'testing');
+                }
+                
+                return this.calculateStats(name, url, results);
+            }
+
+            calculateStats(name, url, results) {
+                const successful = results.filter(r => r.success);
+                const failed = results.filter(r => !r.success);
+                
+                if (successful.length === 0) {
+                    this.log(`${name}: All requests failed`);
+                    this.updateEndpointStatus(name, 'All requests failed', 'error');
+                    return {
+                        name,
+                        url,
+                        success: false,
+                        successRate: 0,
+                        totalTests: results.length,
+                        allResults: results
+                    };
+                }
+                
+                const latencies = successful.map(r => r.latency);
+                const sorted = [...latencies].sort((a, b) => a - b);
+                const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+                const variance = latencies.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / latencies.length;
+                
+                const stats = {
+                    name,
+                    url,
+                    success: true,
+                    successRate: Math.round((successful.length / results.length) * 100),
+                    totalTests: results.length,
+                    successfulTests: successful.length,
+                    failedTests: failed.length,
+                    min: Math.min(...latencies),
+                    max: Math.max(...latencies),
                     average: Math.round(avg),
                     median: sorted[Math.floor(sorted.length / 2)],
                     standardDeviation: Math.round(Math.sqrt(variance)),
-                    values: values
+                    allResults: results,
+                    latencies: latencies
                 };
+                
+                this.log(`${name}: Avg ${stats.average}ms, Range ${stats.min}-${stats.max}ms, Success ${stats.successRate}%`);
+                this.updateEndpointStatus(name, `Avg: ${stats.average}ms (${stats.successRate}% success)`, 'success');
+                
+                return stats;
+            }
+
+            updateEndpointStatus(name, status, type) {
+                const statusContainer = document.getElementById('endpoint-status');
+                let statusElement = statusContainer.querySelector(`[data-endpoint="${name}"]`);
+                
+                if (!statusElement) {
+                    statusElement = document.createElement('div');
+                    statusElement.className = 'endpoint-status';
+                    statusElement.setAttribute('data-endpoint', name);
+                    statusElement.innerHTML = `<span class="name">${name}</span><span class="status">${status}</span>`;
+                    statusContainer.appendChild(statusElement);
+                } else {
+                    statusElement.querySelector('.status').textContent = status;
+                }
+                
+                statusElement.className = `endpoint-status ${type}`;
             }
 
             async runTests() {
-                this.log(`Starting test run with ${this.config.iterations} iterations`);
-                this.log(`Variance factor: ${this.config.variance}`);
-                this.log(`Test scenario: ${this.config.scenario}`);
+                const config = this.getConfiguration();
+                const endpoints = this.getEnabledRoutes();
                 
-                const traditional = [];
-                const googleBackbone = [];
-                const direct = [];
-                
-                const progressBar = document.getElementById('progress');
-                
-                for (let i = 0; i < this.config.iterations; i++) {
-                    // Simulate async execution for UI responsiveness
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    
-                    traditional.push(this.testTraditionalRouting());
-                    googleBackbone.push(this.testGoogleBackbone());
-                    direct.push(this.testDirectRouting());
-                    
-                    // Update progress
-                    const progress = ((i + 1) / this.config.iterations) * 100;
-                    progressBar.style.width = progress + '%';
-                    
-                    if ((i + 1) % 5 === 0) {
-                        this.log(`Completed ${i + 1}/${this.config.iterations} iterations`);
-                    }
+                if (endpoints.length === 0) {
+                    throw new Error('No routing endpoints enabled for testing');
                 }
                 
-                this.log('Processing results...');
+                this.log(`🚀 Starting routing performance comparison`);
+                this.log(`Testing ${endpoints.length} routing paths with ${config.iterations} iterations each`);
+                this.log(`Timeout: ${config.timeout}s, Mode: ${config.testMode}`);
                 
-                const results = {
-                    traditional: { stats: this.calculateStats(traditional) },
-                    googleBackbone: { stats: this.calculateStats(googleBackbone) },
-                    direct: { stats: this.calculateStats(direct) },
-                    config: this.config,
-                    timestamp: new Date().toISOString()
-                };
+                const allResults = {};
+                const totalTests = endpoints.length * config.iterations;
+                let completedTests = 0;
                 
-                // Calculate improvements
-                const traditionalAvg = results.traditional.stats.average;
-                const googleAvg = results.googleBackbone.stats.average;
-                const directAvg = results.direct.stats.average;
-                
-                results.improvements = {
-                    googleVsTraditional: {
-                        absoluteMs: traditionalAvg - googleAvg,
-                        percentage: Math.round(((traditionalAvg - googleAvg) / traditionalAvg) * 100)
-                    },
-                    googleVsDirect: {
-                        absoluteMs: directAvg - googleAvg,
-                        percentage: Math.round(((directAvg - googleAvg) / directAvg) * 100)
-                    }
-                };
-                
-                this.log(`Tests completed successfully!`);
-                this.log(`Traditional ISP: ${traditionalAvg}ms (±${results.traditional.stats.standardDeviation}ms)`);
-                this.log(`Google Backbone: ${googleAvg}ms (±${results.googleBackbone.stats.standardDeviation}ms)`);
-                this.log(`Improvement: ${results.improvements.googleVsTraditional.absoluteMs}ms (${results.improvements.googleVsTraditional.percentage}%)`);
-                
-                return results;
-            }
-
-            performReliabilityAnalysis(results) {
-                const analysis = {};
-                
-                ['traditional', 'googleBackbone', 'direct'].forEach(route => {
-                    const stats = results[route].stats;
-                    const consistencyScore = Math.max(0, 100 - (stats.standardDeviation / stats.average * 100));
-                    
-                    analysis[route] = {
-                        consistency: Math.round(consistencyScore),
-                        reliability: consistencyScore > 85 ? 'High' : consistencyScore > 70 ? 'Medium' : 'Low',
-                        range: `${stats.min}-${stats.max}ms`,
-                        coefficient: (stats.standardDeviation / stats.average * 100).toFixed(2)
-                    };
-                });
-                
-                return analysis;
-            }
-
-            performLoadAnalysis(results) {
-                const loadScenarios = [
-                    { name: 'Normal Load', factor: 1.0 },
-                    { name: 'High Load', factor: 1.3 },
-                    { name: 'Peak Load', factor: 1.7 },
-                    { name: 'Stress Load', factor: 2.2 }
-                ];
-                
-                const baseGoogle = results.googleBackbone.stats.average;
-                const baseTraditional = results.traditional.stats.average;
-                
-                return loadScenarios.map(scenario => {
-                    const googleLoad = Math.round(baseGoogle * scenario.factor);
-                    const traditionalLoad = Math.round(baseTraditional * scenario.factor);
-                    const improvement = traditionalLoad - googleLoad;
-                    
-                    return {
-                        scenario: scenario.name,
-                        googleLoad,
-                        traditionalLoad,
-                        improvement,
-                        percentage: Math.round((improvement / traditionalLoad) * 100)
-                    };
-                });
-            }
-
-            performCostAnalysis(results) {
-                const vmCost = 35; // Monthly e2-small cost
-                const costScenarios = [
-                    { usage: 'Light (500GB)', gb: 500 },
-                    { usage: 'Medium (1.5TB)', gb: 1500 },
-                    { usage: 'Heavy (5TB)', gb: 5000 },
-                    { usage: 'Enterprise (15TB)', gb: 15000 }
-                ];
-                
-                const latencyImprovement = results.improvements.googleVsTraditional.absoluteMs;
-                
-                return costScenarios.map(scenario => {
-                    const transferCost = scenario.gb * 0.02;
-                    const totalCost = vmCost + transferCost;
-                    const costPerMs = (totalCost / latencyImprovement).toFixed(2);
-                    
-                    return {
-                        usage: scenario.usage,
-                        totalCost,
-                        costPerMs: parseFloat(costPerMs),
-                        efficiency: parseFloat(costPerMs) < 0.5 ? 'Excellent' : 
-                                   parseFloat(costPerMs) < 1.0 ? 'Good' : 
-                                   parseFloat(costPerMs) < 2.0 ? 'Fair' : 'Poor'
-                    };
-                });
-            }
-        }
-
-        // Configuration Presets and Optimization
-        const routePresets = {
-            'current_optimal': {
-                name: 'Current Optimal (Your Setup)',
-                sa_marseille: 180, marseille_singapore: 160, singapore_tokyo: 80,
-                tokyo_sydney: 120, sydney_auckland: 25,
-                sa_google_pop: 15, google_backbone: 280, vm_auckland: 24
-            },
-            'aws_backbone': {
-                name: 'AWS Global Accelerator Alternative',
-                sa_marseille: 180, marseille_singapore: 160, singapore_tokyo: 80,
-                tokyo_sydney: 120, sydney_auckland: 25,
-                sa_google_pop: 25, google_backbone: 290, vm_auckland: 28
-            },
-            'azure_express': {
-                name: 'Azure ExpressRoute Alternative',
-                sa_marseille: 180, marseille_singapore: 160, singapore_tokyo: 80,
-                tokyo_sydney: 120, sydney_auckland: 25,
-                sa_google_pop: 20, google_backbone: 295, vm_auckland: 26
-            },
-            'cloudflare_edge': {
-                name: 'Cloudflare Global Network',
-                sa_marseille: 180, marseille_singapore: 160, singapore_tokyo: 80,
-                tokyo_sydney: 120, sydney_auckland: 25,
-                sa_google_pop: 12, google_backbone: 285, vm_auckland: 22
-            },
-            'multi_cloud': {
-                name: 'Multi-Cloud Optimization',
-                sa_marseille: 180, marseille_singapore: 160, singapore_tokyo: 80,
-                tokyo_sydney: 120, sydney_auckland: 25,
-                sa_google_pop: 18, google_backbone: 275, vm_auckland: 20
-            }
-        };
-
-        // Auto-optimization algorithms
-        class RouteOptimizer {
-            constructor(baseConfig) {
-                this.baseConfig = baseConfig;
-                this.optimizationResults = [];
-            }
-
-            // Generate variations of route configurations
-            generateRouteVariations(target, scenarios) {
-                const variations = [];
-                const baseRoutes = {
-                    sa_google_pop: this.baseConfig.sa_google_pop,
-                    google_backbone: this.baseConfig.google_backbone,
-                    vm_auckland: this.baseConfig.vm_auckland
-                };
-
-                for (let i = 0; i < scenarios; i++) {
-                    let variation;
-                    
-                    switch (target) {
-                        case 'latency':
-                            variation = this.optimizeForLatency(baseRoutes, i);
-                            break;
-                        case 'cost':
-                            variation = this.optimizeForCost(baseRoutes, i);
-                            break;
-                        case 'reliability':
-                            variation = this.optimizeForReliability(baseRoutes, i);
-                            break;
-                        default:
-                            variation = this.optimizeForLatency(baseRoutes, i);
-                    }
-                    
-                    // Create full configuration
-                    variations.push({
-                        ...this.baseConfig,
-                        ...variation,
-                        scenarioId: i + 1,
-                        target: target
-                    });
-                }
-
-                return variations;
-            }
-
-            optimizeForLatency(baseRoutes, iteration) {
-                // Try different POP locations and backbone optimizations
-                const popVariations = [10, 12, 15, 18, 20, 22, 25];
-                const backboneVariations = [270, 275, 280, 285, 290, 295, 300];
-                const vmVariations = [20, 22, 24, 26, 28];
-
-                return {
-                    sa_google_pop: popVariations[iteration % popVariations.length],
-                    google_backbone: backboneVariations[iteration % backboneVariations.length],
-                    vm_auckland: vmVariations[iteration % vmVariations.length],
-                    description: `Latency-optimized scenario ${iteration + 1}`
-                };
-            }
-
-            optimizeForCost(baseRoutes, iteration) {
-                // Balance performance with cost considerations
-                const scenarios = [
-                    { sa_google_pop: 20, google_backbone: 285, vm_auckland: 25, cost_factor: 0.8 },
-                    { sa_google_pop: 18, google_backbone: 280, vm_auckland: 24, cost_factor: 1.0 },
-                    { sa_google_pop: 15, google_backbone: 275, vm_auckland: 22, cost_factor: 1.2 },
-                    { sa_google_pop: 12, google_backbone: 270, vm_auckland: 20, cost_factor: 1.5 },
-                    { sa_google_pop: 25, google_backbone: 290, vm_auckland: 28, cost_factor: 0.6 }
-                ];
-
-                const scenario = scenarios[iteration % scenarios.length];
-                return {
-                    ...scenario,
-                    description: `Cost-optimized scenario ${iteration + 1} (${scenario.cost_factor}x cost)`
-                };
-            }
-
-            optimizeForReliability(baseRoutes, iteration) {
-                // Focus on consistent, redundant paths
-                const reliabilityScenarios = [
-                    { sa_google_pop: 16, google_backbone: 282, vm_auckland: 24, redundancy: 'high' },
-                    { sa_google_pop: 14, google_backbone: 278, vm_auckland: 23, redundancy: 'premium' },
-                    { sa_google_pop: 18, google_backbone: 285, vm_auckland: 25, redundancy: 'standard' },
-                    { sa_google_pop: 12, google_backbone: 275, vm_auckland: 21, redundancy: 'ultra' },
-                    { sa_google_pop: 20, google_backbone: 288, vm_auckland: 26, redundancy: 'basic' }
-                ];
-
-                const scenario = reliabilityScenarios[iteration % reliabilityScenarios.length];
-                return {
-                    ...scenario,
-                    description: `Reliability-optimized scenario ${iteration + 1} (${scenario.redundancy} redundancy)`
-                };
-            }
-
-            async runOptimization() {
-                try {
-                    const target = document.getElementById('optimizationTarget').value;
-                    const scenarios = parseInt(document.getElementById('autoTestScenarios').value);
-                    
-                    updateStatus('Running auto-optimization...', 'running');
-                    this.log('🤖 Starting automatic route optimization');
-                    this.log(`Target: ${target}, Testing ${scenarios} scenarios`);
-
-                    const variations = this.generateRouteVariations(target, scenarios);
-                    this.optimizationResults = [];
-
-                    for (let i = 0; i < variations.length; i++) {
-                        const config = variations[i];
-                        this.log(`Testing scenario ${i + 1}/${scenarios}: ${config.description}`);
+                for (const endpoint of endpoints) {
+                    try {
+                        this.log(`\n🛣️  Testing route: ${endpoint.name}`);
+                        const result = await this.testEndpoint(
+                            endpoint.name, 
+                            endpoint.url, 
+                            config.iterations, 
+                            config.timeout * 1000
+                        );
                         
-                        // Update progress
-                        const progress = (i / scenarios) * 100;
+                        allResults[endpoint.name] = result;
+                        completedTests += config.iterations;
+                        
+                        const progress = (completedTests / totalTests) * 100;
                         document.getElementById('progress').style.width = progress + '%';
-
-                        // Run tests with this configuration
-                        const tester = new NetworkLatencyTester(config);
-                        const results = await tester.runTests();
                         
-                        // Calculate optimization score
-                        const score = this.calculateOptimizationScore(results, target);
+                    } catch (error) {
+                        this.log(`❌ Error testing ${endpoint.name}: ${error.message}`);
+                        this.updateEndpointStatus(endpoint.name, `Error: ${error.message}`, 'error');
+                    }
+                }
+                
+                this.log('\n✅ Routing performance tests completed!');
+                this.log('📊 Generating performance analysis...');
+                
+                return {
+                    timestamp: new Date().toISOString(),
+                    config: config,
+                    scenario: document.getElementById('scenario-description').value,
+                    endpoints: allResults,
+                    summary: this.generateSummary(allResults)
+                };
+            }
+
+            generateSummary(results) {
+                const successful = Object.values(results).filter(r => r.success);
+                
+                if (successful.length === 0) {
+                    return {
+                        totalEndpoints: Object.keys(results).length,
+                        successfulEndpoints: 0,
+                        bestRoute: null,
+                        worstRoute: null,
+                        improvement: null
+                    };
+                }
+                
+                const fastest = successful.reduce((min, r) => r.average < min.average ? r : min);
+                const slowest = successful.reduce((max, r) => r.average > max.average ? r : max);
+                const totalTests = Object.values(results).reduce((sum, r) => sum + r.totalTests, 0);
+                const totalSuccessful = Object.values(results).reduce((sum, r) => sum + (r.successfulTests || 0), 0);
+                const avgLatency = Math.round(successful.reduce((sum, r) => sum + r.average, 0) / successful.length);
+                
+                let improvement = null;
+                if (fastest && slowest && fastest !== slowest) {
+                    const improvementMs = slowest.average - fastest.average;
+                    const improvementPercent = Math.round((improvementMs / slowest.average) * 100);
+                    
+                    improvement = {
+                        latencyReduction: improvementMs,
+                        percentageImprovement: improvementPercent
+                    };
+                }
+                
+                return {
+                    totalEndpoints: Object.keys(results).length,
+                    successfulEndpoints: successful.length,
+                    bestRoute: fastest,
+                    worstRoute: slowest,
+                    improvement,
+                    averageLatency: avgLatency,
+                    overallSuccessRate: Math.round((totalSuccessful / totalTests) * 100),
+                    routeRanking: successful.sort((a, b) => a.average - b.average)
+                };
+            }
+
+            getConfiguration() {
+                return {
+                    iterations: parseInt(document.getElementById('iterations').value),
+                    timeout: parseInt(document.getElementById('timeout').value),
+                    testMode: document.getElementById('testMode').value
+                };
+            }
+
+            getEnabledRoutes() {
+                const routes = [];
+                const routeElements = document.querySelectorAll('.route-entry');
+                
+                routeElements.forEach(element => {
+                    const checkbox = element.querySelector('.route-checkbox');
+                    if (checkbox && checkbox.checked) {
+                        const nameInput = element.querySelector('.route-name');
+                        const urlInput = element.querySelector('.route-url');
+                        const typeSelect = element.querySelector('.route-type-select');
                         
-                        this.optimizationResults.push({
-                            config: config,
-                            results: results,
-                            score: score,
-                            scenario: i + 1
-                        });
-
-                        // Small delay for UI responsiveness
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-
-                    // Find optimal configuration
-                    this.log('🔍 Processing optimization results...');
-                    const optimal = this.findOptimalConfiguration();
-                    
-                    if (!optimal) {
-                        throw new Error('No valid optimal configuration found');
-                    }
-                    
-                    this.log(`✅ Optimization completed! Best result: ${optimal.results.improvements.googleVsTraditional.absoluteMs}ms improvement`);
-                    this.displayOptimizationResults(optimal);
-                    
-                    updateStatus('Auto-optimization completed successfully', 'complete');
-                    return optimal;
-                    
-                } catch (error) {
-                    console.error('Optimization error:', error);
-                    this.log(`❌ Optimization error: ${error.message}`);
-                    
-                    // If we have partial results, still try to show them
-                    if (this.optimizationResults && this.optimizationResults.length > 0) {
-                        this.log(`⚠️ Showing partial results from ${this.optimizationResults.length} completed scenarios`);
-                        try {
-                            const bestPartial = this.findOptimalConfiguration();
-                            if (bestPartial) {
-                                this.displayOptimizationResults(bestPartial);
-                                updateStatus('Optimization completed with partial results', 'complete');
-                                return bestPartial;
-                            }
-                        } catch (partialError) {
-                            this.log(`❌ Could not process partial results: ${partialError.message}`);
+                        if (nameInput && urlInput && urlInput.value.trim() !== '') {
+                            routes.push({
+                                name: nameInput.value || 'Unnamed Route',
+                                url: urlInput.value.trim(),
+                                type: typeSelect ? typeSelect.value : 'custom',
+                                description: element.querySelector('.route-description')?.value || ''
+                            });
                         }
                     }
-                    
-                    updateStatus('Optimization failed', 'idle');
-                    throw error;
-                }
-            }
-
-            calculateOptimizationScore(results, target) {
-                const improvement = results.improvements.googleVsTraditional;
-                const googleStats = results.googleBackbone.stats;
-
-                switch (target) {
-                    case 'latency':
-                        return improvement.absoluteMs * 10 - googleStats.standardDeviation;
-                    case 'cost':
-                        // Balance improvement with cost (assuming lower latency configs cost more)
-                        const costFactor = results.config.cost_factor || 1.0;
-                        return (improvement.absoluteMs * 5) / costFactor;
-                    case 'reliability':
-                        const consistencyScore = Math.max(0, 100 - (googleStats.standardDeviation / googleStats.average * 100));
-                        return improvement.absoluteMs * 3 + consistencyScore * 2;
-                    default:
-                        return improvement.absoluteMs;
-                }
-            }
-
-            findOptimalConfiguration() {
-                return this.optimizationResults.reduce((best, current) => 
-                    current.score > best.score ? current : best
-                );
-            }
-
-            displayOptimizationResults(optimal) {
-                try {
-                    const analysisContent = document.getElementById('analysis-content');
-                    
-                    if (!optimal || !optimal.results) {
-                        throw new Error('Invalid optimization results');
-                    }
-                    
-                    // Store optimal config globally for apply button
-                    storedOptimalConfig = optimal.config;
-                    
-                    // Sort results by score with error handling
-                    const sortedResults = [...this.optimizationResults].sort((a, b) => {
-                        const scoreA = a.score || 0;
-                        const scoreB = b.score || 0;
-                        return scoreB - scoreA;
-                    });
-                    
-                    // Safe data extraction with defaults
-                    const improvementMs = optimal.results.improvements?.googleVsTraditional?.absoluteMs || 0;
-                    const improvementPct = optimal.results.improvements?.googleVsTraditional?.percentage || 0;
-                    const googleLatency = optimal.results.googleBackbone?.stats?.average || 0;
-                    const optimalScore = optimal.score || 0;
-                    const scenario = optimal.scenario || 'Unknown';
-                    
-                    const resultRows = sortedResults.map(result => {
-                        const resultLatency = result.results?.googleBackbone?.stats?.average || 0;
-                        const resultImprovement = result.results?.improvements?.googleVsTraditional?.absoluteMs || 0;
-                        const resultScore = result.score || 0;
-                        const resultDesc = result.config?.description || 'Unknown scenario';
-                        return `
-                            <tr>
-                                <td>${result.scenario || 'N/A'}</td>
-                                <td>${resultLatency}ms</td>
-                                <td>${resultImprovement}ms</td>
-                                <td>${resultScore.toFixed(1)}</td>
-                                <td>${resultDesc}</td>
-                            </tr>
-                        `;
-                    }).join('');
-                    
-                    analysisContent.innerHTML = `
-                        <h4>🎯 Auto-Optimization Results</h4>
-                        <div class="metric-grid">
-                            <div class="metric-card">
-                                <div class="metric-value">${improvementMs}ms</div>
-                                <div class="metric-label">Optimal Improvement</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">${googleLatency}ms</div>
-                                <div class="metric-label">Optimal Latency</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">${optimalScore.toFixed(1)}</div>
-                                <div class="metric-label">Optimization Score</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">${scenario}</div>
-                                <div class="metric-label">Best Scenario</div>
-                            </div>
-                        </div>
-                        
-                        <div class="results-container">
-                            <h4>🏆 Recommended Configuration</h4>
-                            <table class="results-table">
-                                <tbody>
-                                    <tr><td>SA to Google JHB POP</td><td>${optimal.config?.sa_google_pop || 'N/A'}ms</td></tr>
-                                    <tr><td>Google Backbone JHB-Sydney</td><td>${optimal.config?.google_backbone || 'N/A'}ms</td></tr>
-                                    <tr><td>Sydney VM to Auckland</td><td>${optimal.config?.vm_auckland || 'N/A'}ms</td></tr>
-                                    <tr><td>Expected Improvement</td><td><span class="highlight">${improvementMs}ms (${improvementPct}%)</span></td></tr>
-                                </tbody>
-                            </table>
-                            <button class="btn btn-success" onclick="applyOptimalConfiguration()">
-                                ✅ Apply This Configuration
-                            </button>
-                        </div>
-                        
-                        <h4>📊 All Tested Scenarios</h4>
-                        <table class="results-table">
-                            <thead>
-                                <tr>
-                                    <th>Scenario</th>
-                                    <th>Google Latency</th>
-                                    <th>Improvement</th>
-                                    <th>Score</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${resultRows}
-                            </tbody>
-                        </table>
-                    `;
-
-                    // Switch to analysis tab to show results
-                    showTab('analysis');
-                    this.log('✅ Optimization results displayed successfully');
-                    
-                } catch (error) {
-                    console.error('Error displaying optimization results:', error);
-                    this.log(`❌ Error displaying results: ${error.message}`);
-                    
-                    // Show fallback results
-                    const analysisContent = document.getElementById('analysis-content');
-                    analysisContent.innerHTML = `
-                        <div class="results-container">
-                            <h4>⚠️ Optimization Results (Fallback View)</h4>
-                            <p>The optimization completed successfully but there was an error displaying the detailed results.</p>
-                            <p><strong>Number of scenarios tested:</strong> ${this.optimizationResults.length}</p>
-                            <p><strong>Best improvement found:</strong> Check the logs for detailed results.</p>
-                            <button class="btn" onclick="showTab('logs')">📋 View Detailed Logs</button>
-                        </div>
-                    `;
-                }
-            }
-
-            log(message) {
-                const timestamp = new Date().toLocaleTimeString();
-                const logMessage = `[${timestamp}] ${message}`;
+                });
                 
-                const logOutput = document.getElementById('log-output');
-                logOutput.textContent += logMessage + '\n';
-                logOutput.scrollTop = logOutput.scrollHeight;
+                return routes;
             }
         }
 
-        // UI Functions for configuration management
-        function applyOptimalConfiguration() {
-            if (!storedOptimalConfig) {
-                alert('No optimal configuration available. Please run auto-optimization first.');
-                return;
-            }
+        // UI Management Functions
+        function loadPresetScenario(scenarioId) {
+            const scenario = presetScenarios[scenarioId];
+            if (!scenario) return;
             
-            document.getElementById('sa_google_pop').value = storedOptimalConfig.sa_google_pop;
-            document.getElementById('google_backbone').value = storedOptimalConfig.google_backbone;
-            document.getElementById('vm_auckland').value = storedOptimalConfig.vm_auckland;
+            // Update description
+            document.getElementById('scenario-description').value = scenario.description;
             
-            updateStatus('Optimal configuration applied', 'complete');
-            alert('Optimal configuration has been applied! You can now run tests with these settings.');
-        }
-
-        function loadPresetConfig() {
-            const presetSelect = document.createElement('select');
-            presetSelect.innerHTML = Object.keys(routePresets).map(key => 
-                `<option value="${key}">${routePresets[key].name}</option>`
-            ).join('');
+            // Update visualization
+            document.querySelector('#scenario-visualization .route-diagram').innerHTML = scenario.visualization;
             
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                background: white; padding: 30px; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                z-index: 1000; min-width: 400px;
-            `;
+            // Clear and rebuild routing endpoints
+            const container = document.getElementById('routing-endpoints');
+            container.innerHTML = '';
+            routeCounter = 0;
             
-            modal.innerHTML = `
-                <h3>Load Configuration Preset</h3>
-                <div style="margin: 20px 0;">
-                    <label>Select Preset:</label><br>
-                    ${presetSelect.outerHTML}
-                </div>
-                <button onclick="applyPreset(this)" style="margin-right: 10px;" class="btn">Load Preset</button>
-                <button onclick="closeModal(this)" class="btn btn-warning">Cancel</button>
-            `;
-            
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;';
-            overlay.appendChild(modal);
-            
-            document.body.appendChild(overlay);
-        }
-
-        function applyPreset(button) {
-            const select = button.parentElement.querySelector('select');
-            const presetKey = select.value;
-            const preset = routePresets[presetKey];
-            
-            // Apply all configuration values
-            Object.keys(preset).forEach(key => {
-                if (key !== 'name') {
-                    const element = document.getElementById(key);
-                    if (element) element.value = preset[key];
-                }
+            scenario.routes.forEach(route => {
+                addRouteEntry(route);
             });
+        }
+
+        function addRouteEntry(routeData = null) {
+            const container = document.getElementById('routing-endpoints');
+            const routeId = `route-${routeCounter++}`;
             
-            closeModal(button);
-            updateStatus(`Loaded preset: ${preset.name}`, 'complete');
+            const route = routeData || {
+                name: 'Custom Route',
+                url: '',
+                type: 'custom',
+                description: '',
+                enabled: false
+            };
+            
+            const routeElement = document.createElement('div');
+            routeElement.className = `route-entry ${route.enabled ? 'enabled' : ''}`;
+            routeElement.innerHTML = `
+                <div class="route-header">
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" class="route-checkbox" ${route.enabled ? 'checked' : ''} 
+                               onchange="toggleRouteEntry(this)">
+                        <strong style="margin-left: 8px;">${route.name}</strong>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="route-type ${route.type}">${route.type.toUpperCase()}</span>
+                        <button class="btn btn-small" onclick="removeRouteEntry(this)" style="background: #e74c3c; padding: 4px 8px;">×</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Route Name:</label>
+                    <input type="text" class="route-name" value="${route.name}" placeholder="Enter route name">
+                </div>
+                <div class="form-group">
+                    <label>Endpoint URL:</label>
+                    <input type="url" class="route-url" value="${route.url}" placeholder="https://example.com/endpoint">
+                </div>
+                <div class="form-group">
+                    <label>Route Type:</label>
+                    <select class="route-type-select" onchange="updateRouteType(this)">
+                        <option value="traditional" ${route.type === 'traditional' ? 'selected' : ''}>Traditional Routing</option>
+                        <option value="optimized" ${route.type === 'optimized' ? 'selected' : ''}>Optimized Routing</option>
+                        <option value="reference" ${route.type === 'reference' ? 'selected' : ''}>Reference/Baseline</option>
+                        <option value="custom" ${route.type === 'custom' ? 'selected' : ''}>Custom/Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input type="text" class="route-description" value="${route.description}" placeholder="Describe this routing path">
+                </div>
+            `;
+            
+            container.appendChild(routeElement);
         }
 
-        function closeModal(button) {
-            const overlay = button.closest('div[style*="position: fixed"]').parentElement;
-            document.body.removeChild(overlay);
+        function addCustomRoute() {
+            addRouteEntry();
         }
 
-        async function runOptimization() {
+        function removeRouteEntry(button) {
+            if (confirm('Remove this routing endpoint?')) {
+                button.closest('.route-entry').remove();
+            }
+        }
+
+        function toggleRouteEntry(checkbox) {
+            const routeEntry = checkbox.closest('.route-entry');
+            if (checkbox.checked) {
+                routeEntry.classList.add('enabled');
+            } else {
+                routeEntry.classList.remove('enabled');
+            }
+        }
+
+        function updateRouteType(select) {
+            const typeSpan = select.closest('.route-entry').querySelector('.route-type');
+            typeSpan.className = `route-type ${select.value}`;
+            typeSpan.textContent = select.value.toUpperCase();
+        }
+
+        // Main test execution
+        async function runRoutingTests() {
             if (isRunning) {
-                alert('A test is already running. Please wait for it to complete.');
+                alert('Tests are already running. Please wait for completion.');
                 return;
             }
             
             isRunning = true;
-            const config = getConfiguration();
-            const optimizer = new RouteOptimizer(config);
+            updateStatus('Running routing performance tests...', 'running');
             
-            // Clear previous logs
-            document.getElementById('log-output').textContent = 'Starting auto-optimization...\n';
+            document.getElementById('log-output').textContent = 'Starting routing performance tests...\n';
+            document.getElementById('endpoint-status').innerHTML = '';
             
             try {
-                const results = await optimizer.runOptimization();
-                console.log('Optimization completed successfully:', results);
-            } catch (error) {
-                console.error('Optimization failed:', error);
+                const tester = new RoutingPerformanceTester();
+                const results = await tester.runTests();
                 
-                // Show user-friendly error message
-                const analysisContent = document.getElementById('analysis-content');
-                analysisContent.innerHTML = `
-                    <div class="results-container">
-                        <h4>⚠️ Optimization Status</h4>
-                        <p><strong>The optimization actually completed successfully!</strong></p>
-                        <p>Based on your logs, all scenarios were tested and results are available.</p>
-                        <div class="metric-grid">
-                            <div class="metric-card">
-                                <div class="metric-value">Multiple</div>
-                                <div class="metric-label">Scenarios Tested</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">Success</div>
-                                <div class="metric-label">Test Status</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">Available</div>
-                                <div class="metric-label">Results</div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-value">Complete</div>
-                                <div class="metric-label">Process Status</div>
-                            </div>
-                        </div>
-                        <p>Check the logs tab for detailed results from all scenarios.</p>
-                        <button class="btn" onclick="showTab('logs')">📋 View Detailed Results</button>
-                    </div>
-                `;
-                showTab('analysis');
-                updateStatus('Optimization results available (check Analysis tab)', 'complete');
+                testResults = results;
+                
+                updateOverview(results);
+                updateDetailedResults(results);
+                updateAnalysis(results);
+                
+                updateStatus('Routing performance tests completed', 'complete');
+                
+            } catch (error) {
+                console.error('Test execution failed:', error);
+                updateStatus(`Test failed: ${error.message}`, 'error');
+                
+                const logOutput = document.getElementById('log-output');
+                logOutput.textContent += `ERROR: ${error.message}\n`;
             } finally {
                 isRunning = false;
                 document.getElementById('progress').style.width = '0%';
             }
         }
 
-        function analyzeLogsManually() {
-            const logOutput = document.getElementById('log-output');
-            const logText = logOutput.textContent;
-            
-            // Parse optimization results from logs
-            const scenarios = [];
-            const lines = logText.split('\n');
-            
-            let currentScenario = null;
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                
-                // Match scenario start
-                if (line.includes('Testing scenario') && line.includes('scenario')) {
-                    const match = line.match(/Testing scenario (\d+)\/\d+/);
-                    if (match) {
-                        currentScenario = parseInt(match[1]);
-                    }
-                }
-                
-                // Match results
-                if (line.includes('Improvement:') && line.includes('ms') && line.includes('%')) {
-                    const match = line.match(/Improvement: (\d+)ms \((\d+)%\)/);
-                    if (match && currentScenario) {
-                        scenarios.push({
-                            scenario: currentScenario,
-                            improvement: parseInt(match[1]),
-                            percentage: parseInt(match[2])
-                        });
-                    }
-                }
-            }
-            
-            if (scenarios.length === 0) {
-                alert('No optimization results found in logs. Please run auto-optimization first.');
-                return;
-            }
-            
-            // Find best scenario
-            const bestScenario = scenarios.reduce((best, current) => 
-                current.improvement > best.improvement ? current : best
-            );
-            
-            const scenarioRows = scenarios.map(s => `
-                <tr${s.scenario === bestScenario.scenario ? ' style="background-color: #e8f5e8;"' : ''}>
-                    <td>Scenario ${s.scenario}${s.scenario === bestScenario.scenario ? ' 🏆' : ''}</td>
-                    <td>${s.improvement}ms</td>
-                    <td>${s.percentage}%</td>
-                    <td>${s.scenario === bestScenario.scenario ? '<span class="highlight">Best</span>' : 'Good'}</td>
-                </tr>
-            `).join('');
-            
-            // Display manual analysis
-            const analysisContent = document.getElementById('analysis-content');
-            analysisContent.innerHTML = `
-                <h4>🔍 Manual Log Analysis Results</h4>
-                <div class="metric-grid">
-                    <div class="metric-card">
-                        <div class="metric-value">${bestScenario.improvement}ms</div>
-                        <div class="metric-label">Best Improvement Found</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${bestScenario.percentage}%</div>
-                        <div class="metric-label">Performance Gain</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${bestScenario.scenario}</div>
-                        <div class="metric-label">Best Scenario</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${scenarios.length}</div>
-                        <div class="metric-label">Scenarios Tested</div>
-                    </div>
-                </div>
-                
-                <div class="results-container">
-                    <h4>📊 All Scenarios (Parsed from Logs)</h4>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>Scenario</th>
-                                <th>Improvement</th>
-                                <th>Performance Gain</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${scenarioRows}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="results-container">
-                    <h4>💡 Analysis Summary</h4>
-                    <p><strong>✅ Optimization was successful!</strong> All ${scenarios.length} scenarios completed successfully.</p>
-                    <p><strong>Best Configuration:</strong> Scenario ${bestScenario.scenario} achieved ${bestScenario.improvement}ms improvement (${bestScenario.percentage}% better than traditional routing).</p>
-                    <p><strong>Range of Results:</strong> Improvements ranged from ${Math.min(...scenarios.map(s => s.improvement))}ms to ${Math.max(...scenarios.map(s => s.improvement))}ms.</p>
-                    <p><strong>Recommendation:</strong> ${bestScenario.improvement > 250 ? 'Excellent results! This configuration significantly outperforms your baseline.' : 'Good results! This shows meaningful improvement over traditional routing.'}</p>
-                </div>
-            `;
-            
-            showTab('analysis');
-            updateStatus(`Manual analysis complete - found ${scenarios.length} results`, 'complete');
-        }
-
-        // Tab management function
-        function showTab(tabName) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked tab (find by onclick attribute)
-            const clickedTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
-                tab.getAttribute('onclick').includes(tabName)
-            );
-            if (clickedTab) {
-                clickedTab.classList.add('active');
-            }
-        }
-
-        function updateStatus(message, type = 'idle') {
-            const statusElement = document.getElementById('status');
-            const indicator = statusElement.querySelector('.status-indicator');
-            
-            indicator.className = `status-indicator status-${type}`;
-            statusElement.querySelector('span:last-child').textContent = message;
-        }
-
-        function getConfiguration() {
-            return {
-                iterations: parseInt(document.getElementById('iterations').value),
-                variance: parseFloat(document.getElementById('variance').value),
-                scenario: document.getElementById('scenario').value,
-                sa_marseille: parseInt(document.getElementById('sa_marseille').value),
-                marseille_singapore: parseInt(document.getElementById('marseille_singapore').value),
-                singapore_tokyo: parseInt(document.getElementById('singapore_tokyo').value),
-                tokyo_sydney: parseInt(document.getElementById('tokyo_sydney').value),
-                sydney_auckland: parseInt(document.getElementById('sydney_auckland').value),
-                sa_google_pop: parseInt(document.getElementById('sa_google_pop').value),
-                google_backbone: parseInt(document.getElementById('google_backbone').value),
-                vm_auckland: parseInt(document.getElementById('vm_auckland').value)
-            };
-        }
-
         function updateOverview(results) {
-            document.getElementById('traditional-avg').textContent = results.traditional.stats.average + 'ms';
-            document.getElementById('google-avg').textContent = results.googleBackbone.stats.average + 'ms';
-            document.getElementById('improvement-ms').textContent = results.improvements.googleVsTraditional.absoluteMs + 'ms';
-            document.getElementById('improvement-percent').textContent = results.improvements.googleVsTraditional.percentage + '%';
+            const summary = results.summary;
             
+            // Update metrics
+            const bestLatency = document.getElementById('best-latency');
+            const worstLatency = document.getElementById('worst-latency');
+            const improvementMs = document.getElementById('improvement-ms');
+            const improvementPercent = document.getElementById('improvement-percent');
+            
+            if (bestLatency && summary.bestRoute) {
+                bestLatency.textContent = summary.bestRoute.success ? `${summary.bestRoute.average}ms` : 'Failed';
+            }
+            
+            if (worstLatency && summary.worstRoute) {
+                worstLatency.textContent = summary.worstRoute.success ? `${summary.worstRoute.average}ms` : 'Failed';
+            }
+            
+            if (improvementMs && improvementPercent && summary.improvement) {
+                improvementMs.textContent = `${summary.improvement.latencyReduction}ms`;
+                improvementPercent.textContent = `${summary.improvement.percentageImprovement}%`;
+            } else {
+                if (improvementMs) improvementMs.textContent = '--';
+                if (improvementPercent) improvementPercent.textContent = '--';
+            }
+            
+            // Update summary content
             const summaryContent = document.getElementById('summary-content');
+            if (!summaryContent) return;
+            
+            const endpointRows = summary.routeRanking
+                .map((endpoint, index) => {
+                    const rank = index + 1;
+                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                    
+                    return `
+                        <tr>
+                            <td>${rankEmoji} ${endpoint.name}</td>
+                            <td>${endpoint.average}ms</td>
+                            <td>${endpoint.min}-${endpoint.max}ms</td>
+                            <td>±${endpoint.standardDeviation}ms</td>
+                            <td>${endpoint.successRate}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            
+            let analysisText = '';
+            if (summary.improvement && summary.improvement.latencyReduction > 0) {
+                const isSignificant = summary.improvement.latencyReduction > 50;
+                analysisText = `
+                    <div class="${isSignificant ? 'success-box' : 'info-box'}">
+                        <strong>${isSignificant ? '✅ SIGNIFICANT PERFORMANCE DIFFERENCE' : 'ℹ️ PERFORMANCE VARIATION'}</strong><br>
+                        Best route (${summary.bestRoute.name}) is <strong>${summary.improvement.latencyReduction}ms faster</strong> 
+                        (${summary.improvement.percentageImprovement}% improvement) than worst route (${summary.worstRoute.name}).
+                        ${isSignificant ? '<br><br><strong>Recommendation:</strong> Consider optimizing to use the fastest routing path.' : ''}
+                    </div>
+                `;
+            } else if (summary.successfulEndpoints > 0) {
+                analysisText = `
+                    <div class="info-box">
+                        <strong>ℹ️ SIMILAR PERFORMANCE</strong><br>
+                        All tested routes show similar performance characteristics. 
+                        Consider other factors like reliability and cost for routing decisions.
+                    </div>
+                `;
+            }
+            
             summaryContent.innerHTML = `
+                ${analysisText}
+                <h4>🏆 Route Performance Ranking</h4>
                 <table class="results-table">
                     <thead>
                         <tr>
-                            <th>Routing Method</th>
+                            <th>Route</th>
                             <th>Average Latency</th>
                             <th>Range</th>
                             <th>Std. Deviation</th>
-                            <th>Performance</th>
+                            <th>Success Rate</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Traditional ISP</td>
-                            <td>${results.traditional.stats.average}ms</td>
-                            <td>${results.traditional.stats.min}-${results.traditional.stats.max}ms</td>
-                            <td>±${results.traditional.stats.standardDeviation}ms</td>
-                            <td>Baseline</td>
-                        </tr>
-                        <tr>
-                            <td>Google Backbone</td>
-                            <td>${results.googleBackbone.stats.average}ms</td>
-                            <td>${results.googleBackbone.stats.min}-${results.googleBackbone.stats.max}ms</td>
-                            <td>±${results.googleBackbone.stats.standardDeviation}ms</td>
-                            <td><span class="highlight">${results.improvements.googleVsTraditional.absoluteMs}ms faster (${results.improvements.googleVsTraditional.percentage}%)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Direct Routing</td>
-                            <td>${results.direct.stats.average}ms</td>
-                            <td>${results.direct.stats.min}-${results.direct.stats.max}ms</td>
-                            <td>±${results.direct.stats.standardDeviation}ms</td>
-                            <td>${results.improvements.googleVsDirect.absoluteMs}ms slower than Google</td>
-                        </tr>
+                        ${endpointRows}
                     </tbody>
                 </table>
+                
+                <h4>📊 Test Summary</h4>
+                <ul>
+                    <li><strong>Scenario:</strong> ${results.scenario}</li>
+                    <li><strong>Routes Tested:</strong> ${summary.totalEndpoints} (${summary.successfulEndpoints} successful)</li>
+                    <li><strong>Overall Success Rate:</strong> ${summary.overallSuccessRate}%</li>
+                    <li><strong>Average Latency:</strong> ${summary.averageLatency}ms</li>
+                </ul>
             `;
         }
 
         function updateDetailedResults(results) {
             const detailedResults = document.getElementById('detailed-results');
             
-            const rawDataRows = results.traditional.stats.values.slice(0, 10).map((val, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${val}ms</td>
-                    <td>${results.googleBackbone.stats.values[i]}ms</td>
-                    <td>${results.direct.stats.values[i]}ms</td>
-                    <td>${val - results.googleBackbone.stats.values[i]}ms</td>
-                </tr>
-            `).join('');
+            let content = '<h4>📊 Detailed Performance Metrics</h4>';
             
-            detailedResults.innerHTML = `
-                <h4>📊 Statistical Analysis</h4>
-                <div class="metric-grid">
-                    <div class="metric-card">
-                        <div class="metric-value">${results.config.iterations}</div>
-                        <div class="metric-label">Test Iterations</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${(results.config.variance * 100).toFixed(1)}%</div>
-                        <div class="metric-label">Variance Factor</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.traditional.stats.median}ms</div>
-                        <div class="metric-label">Traditional Median</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.googleBackbone.stats.median}ms</div>
-                        <div class="metric-label">Google Median</div>
-                    </div>
-                </div>
+            const sortedEndpoints = Object.values(results.endpoints)
+                .sort((a, b) => {
+                    if (!a.success && !b.success) return 0;
+                    if (!a.success) return 1;
+                    if (!b.success) return -1;
+                    return a.average - b.average;
+                });
+            
+            sortedEndpoints.forEach((endpoint, index) => {
+                const rank = endpoint.success ? index + 1 : 'Failed';
+                const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
                 
-                <h4>🔍 Raw Data Sample (First 10 measurements)</h4>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Iteration</th>
-                            <th>Traditional ISP</th>
-                            <th>Google Backbone</th>
-                            <th>Direct Routing</th>
-                            <th>Improvement</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rawDataRows}
-                    </tbody>
-                </table>
-            `;
+                if (!endpoint.success) {
+                    content += `
+                        <div class="results-container">
+                            <h4>❌ ${endpoint.name} - Connection Failed</h4>
+                            <p>All requests to this route failed. Check the endpoint URL and network connectivity.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let performanceAssessment = '';
+                if (endpoint.average < 200) {
+                    performanceAssessment = '🚀 Excellent performance';
+                } else if (endpoint.average < 350) {
+                    performanceAssessment = '✅ Good performance';
+                } else if (endpoint.average < 500) {
+                    performanceAssessment = '⚠️ Acceptable performance';
+                } else {
+                    performanceAssessment = '🐌 Poor performance';
+                }
+                
+                const sampleData = endpoint.latencies.slice(0, 10).map((latency, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${latency}ms</td>
+                        <td>${latency < 300 ? '🟢' : latency < 500 ? '🟡' : '🔴'}</td>
+                    </tr>
+                `).join('');
+                
+                content += `
+                    <div class="results-container">
+                        <h4>${rankEmoji} ${endpoint.name} ${rank !== 'Failed' ? `(Rank #${rank})` : ''}</h4>
+                        <p>${performanceAssessment}</p>
+                        
+                        <div class="metric-grid">
+                            <div class="metric-card">
+                                <div class="metric-value">${endpoint.average}ms</div>
+                                <div class="metric-label">Average Latency</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">${endpoint.min}ms</div>
+                                <div class="metric-label">Best Response</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">${endpoint.max}ms</div>
+                                <div class="metric-label">Worst Response</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">${endpoint.successRate}%</div>
+                                <div class="metric-label">Reliability</div>
+                            </div>
+                        </div>
+                        
+                        <h5>Sample Measurements (First 10 Tests)</h5>
+                        <table class="results-table">
+                            <thead>
+                                <tr><th>Test #</th><th>Latency</th><th>Performance</th></tr>
+                            </thead>
+                            <tbody>
+                                ${sampleData}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+            
+            detailedResults.innerHTML = content;
         }
 
-        function updateAnalysis(results, tester) {
-            const reliability = tester.performReliabilityAnalysis(results);
-            const loadAnalysis = tester.performLoadAnalysis(results);
-            const costAnalysis = tester.performCostAnalysis(results);
-            
+        function updateAnalysis(results) {
             const analysisContent = document.getElementById('analysis-content');
+            const successful = Object.values(results.endpoints).filter(e => e.success);
+            const summary = results.summary;
             
-            const reliabilityRows = Object.keys(reliability).map(route => `
-                <tr>
-                    <td>${route}</td>
-                    <td>${reliability[route].reliability}</td>
-                    <td>${reliability[route].consistency}%</td>
-                    <td>${reliability[route].coefficient}%</td>
-                </tr>
-            `).join('');
-
-            const loadRows = loadAnalysis.map(scenario => `
-                <tr>
-                    <td>${scenario.scenario}</td>
-                    <td>${scenario.googleLoad}ms</td>
-                    <td>${scenario.traditionalLoad}ms</td>
-                    <td><span class="highlight">+${scenario.improvement}ms (${scenario.percentage}%)</span></td>
-                </tr>
-            `).join('');
-
-            const costRows = costAnalysis.map(scenario => `
-                <tr>
-                    <td>${scenario.usage}</td>
-                    <td>$${scenario.totalCost}</td>
-                    <td>$${scenario.costPerMs}</td>
-                    <td>${scenario.efficiency}</td>
-                </tr>
-            `).join('');
+            if (successful.length === 0) {
+                analysisContent.innerHTML = '<p>No successful tests to analyze. Check your endpoints and network connectivity.</p>';
+                return;
+            }
+            
+            // Performance ranking
+            const performanceRows = successful
+                .sort((a, b) => a.average - b.average)
+                .map((endpoint, index) => {
+                    const rank = index + 1;
+                    const reliability = endpoint.successRate >= 95 ? 'Excellent' : 
+                                       endpoint.successRate >= 85 ? 'Good' : 
+                                       endpoint.successRate >= 70 ? 'Fair' : 'Poor';
+                    const consistency = endpoint.standardDeviation < 50 ? 'Very Consistent' :
+                                       endpoint.standardDeviation < 100 ? 'Consistent' :
+                                       endpoint.standardDeviation < 200 ? 'Variable' : 'Highly Variable';
+                    
+                    return `
+                        <tr>
+                            <td>${rank}</td>
+                            <td>${endpoint.name}</td>
+                            <td>${endpoint.average}ms</td>
+                            <td>${endpoint.standardDeviation}ms</td>
+                            <td>${consistency}</td>
+                            <td>${reliability}</td>
+                        </tr>
+                    `;
+                }).join('');
+            
+            let optimizationAnalysis = '';
+            if (summary.improvement && summary.improvement.latencyReduction > 0) {
+                const improvement = summary.improvement;
+                
+                optimizationAnalysis = `
+                    <div class="results-container">
+                        <h4>🎯 Routing Optimization Analysis</h4>
+                        
+                        <div class="metric-grid">
+                            <div class="metric-card">
+                                <div class="metric-value" style="color: ${improvement.latencyReduction > 100 ? '#27ae60' : improvement.latencyReduction > 50 ? '#f39c12' : '#e74c3c'}">${improvement.latencyReduction}ms</div>
+                                <div class="metric-label">Latency Improvement</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" style="color: ${improvement.percentageImprovement > 30 ? '#27ae60' : improvement.percentageImprovement > 15 ? '#f39c12' : '#e74c3c'}">${improvement.percentageImprovement}%</div>
+                                <div class="metric-label">Performance Gain</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">${summary.bestRoute.successRate}%</div>
+                                <div class="metric-label">Best Route Reliability</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">${improvement.latencyReduction > 100 ? 'Excellent' : improvement.latencyReduction > 50 ? 'Good' : 'Fair'}</div>
+                                <div class="metric-label">Optimization Rating</div>
+                            </div>
+                        </div>
+                        
+                        <h5>Routing Insights</h5>
+                        <div class="${improvement.latencyReduction > 50 ? 'success-box' : 'info-box'}">
+                            <strong>${improvement.latencyReduction > 50 ? '✅ SIGNIFICANT IMPROVEMENT OPPORTUNITY:' : 'ℹ️ MODERATE IMPROVEMENT AVAILABLE:'}</strong><br>
+                            Switching from ${summary.worstRoute.name} to ${summary.bestRoute.name} provides 
+                            ${improvement.latencyReduction}ms improvement (${improvement.percentageImprovement}% faster response times).
+                            ${improvement.latencyReduction > 100 ? '<br><br>This represents a meaningful user experience improvement and should be considered for implementation.' : ''}
+                        </div>
+                    </div>
+                `;
+            }
             
             analysisContent.innerHTML = `
-                <h4>📈 Reliability Analysis</h4>
+                ${optimizationAnalysis}
+                
+                <h4>🏆 Complete Performance Analysis</h4>
                 <table class="results-table">
                     <thead>
                         <tr>
+                            <th>Rank</th>
                             <th>Route</th>
+                            <th>Avg Latency</th>
+                            <th>Variability (±)</th>
+                            <th>Consistency</th>
                             <th>Reliability</th>
-                            <th>Consistency Score</th>
-                            <th>Coefficient of Variation</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${reliabilityRows}
+                        ${performanceRows}
                     </tbody>
                 </table>
                 
-                <h4>⚡ Load Testing Analysis</h4>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Load Scenario</th>
-                            <th>Google Backbone</th>
-                            <th>Traditional ISP</th>
-                            <th>Advantage</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${loadRows}
-                    </tbody>
-                </table>
+                <h4>📈 Key Insights</h4>
+                <div class="results-container">
+                    <ul>
+                        <li><strong>Best Performing Route:</strong> ${summary.bestRoute.name} with ${summary.bestRoute.average}ms average latency</li>
+                        <li><strong>Most Consistent:</strong> ${successful.reduce((min, e) => e.standardDeviation < min.standardDeviation ? e : min).name} (±${successful.reduce((min, e) => e.standardDeviation < min.standardDeviation ? e : min).standardDeviation}ms variation)</li>
+                        <li><strong>Most Reliable:</strong> ${successful.reduce((max, e) => e.successRate > max.successRate ? e : max).name} (${successful.reduce((max, e) => e.successRate > max.successRate ? e : max).successRate}% success rate)</li>
+                        <li><strong>Performance Spread:</strong> ${summary.worstRoute.average - summary.bestRoute.average}ms difference between fastest and slowest routes</li>
+                        <li><strong>Overall Success Rate:</strong> ${summary.overallSuccessRate}% across all routes</li>
+                    </ul>
+                </div>
                 
-                <h4>💰 Cost Analysis</h4>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Usage Scenario</th>
-                            <th>Monthly Cost</th>
-                            <th>Cost per ms</th>
-                            <th>Efficiency</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${costRows}
-                    </tbody>
-                </table>
+                <h4>💡 Recommendations</h4>
+                <div class="results-container">
+                    ${summary.improvement && summary.improvement.latencyReduction > 50 ? 
+                        `<p><strong>High Priority:</strong> Consider implementing the ${summary.bestRoute.name} routing path for significant performance gains.</p>` :
+                        `<p><strong>Monitor:</strong> Performance differences are moderate. Consider other factors like cost, reliability, and complexity.</p>`
+                    }
+                    <p><strong>Next Steps:</strong> Test with production traffic patterns and monitor performance over time to validate results.</p>
+                </div>
             `;
         }
 
-        async function runTests() {
-            if (isRunning) return;
+        // Test endpoint reachability
+        async function testEndpointReachability() {
+            updateStatus('Testing endpoint reachability...', 'running');
             
-            isRunning = true;
-            updateStatus('Running tests...', 'running');
+            const tester = new RoutingPerformanceTester();
+            const routes = tester.getEnabledRoutes();
             
-            // Clear previous logs
-            document.getElementById('log-output').textContent = 'Starting new test run...\n';
-            
-            try {
-                const config = getConfiguration();
-                const tester = new NetworkLatencyTester(config);
-                
-                const results = await tester.runTests();
-                testResults = results;
-                
-                // Update all UI sections
-                updateOverview(results);
-                updateDetailedResults(results);
-                updateAnalysis(results, tester);
-                
-                updateStatus('Tests completed successfully', 'complete');
-                
-            } catch (error) {
-                console.error('Test execution failed:', error);
-                updateStatus('Test execution failed', 'idle');
-            } finally {
-                isRunning = false;
-                document.getElementById('progress').style.width = '0%';
+            if (routes.length === 0) {
+                alert('No routes enabled for testing');
+                updateStatus('Ready to test routing performance', 'idle');
+                return;
             }
+            
+            tester.log('🔍 Testing endpoint reachability...');
+            
+            for (const route of routes) {
+                try {
+                    tester.updateEndpointStatus(route.name, 'Testing...', 'testing');
+                    const result = await tester.measureLatency(route.url, 5000);
+                    
+                    if (result.success) {
+                        tester.updateEndpointStatus(route.name, `✅ Reachable (${result.latency}ms)`, 'success');
+                        tester.log(`${route.name}: Reachable (${result.latency}ms)`);
+                    } else {
+                        tester.updateEndpointStatus(route.name, `❌ ${result.error}`, 'error');
+                        tester.log(`${route.name}: Failed - ${result.error}`);
+                    }
+                } catch (error) {
+                    tester.updateEndpointStatus(route.name, `❌ ${error.message}`, 'error');
+                    tester.log(`${route.name}: Error - ${error.message}`);
+                }
+            }
+            
+            updateStatus('Endpoint reachability test completed', 'complete');
         }
 
+        // Export results
         function exportResults() {
             if (!testResults) {
                 alert('No test results to export. Please run tests first.');
@@ -2716,54 +1515,77 @@ Ready to run tests...
             
             const exportData = {
                 metadata: {
-                    tool: 'Network Latency Optimization Testing Framework',
-                    version: '1.0.0',
+                    tool: 'Geographic Routing Performance Testing Tool',
+                    version: '2.0.0',
                     exportTime: new Date().toISOString(),
-                    testConfiguration: testResults.config
+                    testConfiguration: testResults.config,
+                    testScenario: testResults.scenario
                 },
                 results: testResults,
-                summary: {
-                    traditionalAverage: testResults.traditional.stats.average,
-                    googleBackboneAverage: testResults.googleBackbone.stats.average,
-                    improvementMs: testResults.improvements.googleVsTraditional.absoluteMs,
-                    improvementPercent: testResults.improvements.googleVsTraditional.percentage
-                }
+                summary: testResults.summary,
+                userAgent: navigator.userAgent,
+                timestamp: testResults.timestamp
             };
             
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `latency-test-results-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `routing-performance-results-${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            alert('Results exported successfully!');
+            alert('Routing performance results exported successfully!');
         }
 
+        // Reset configuration
         function resetConfiguration() {
             if (confirm('Reset all configuration to default values?')) {
-                document.getElementById('iterations').value = 20;
-                document.getElementById('variance').value = 0.15;
-                document.getElementById('scenario').value = 'standard';
-                document.getElementById('sa_marseille').value = 180;
-                document.getElementById('marseille_singapore').value = 160;
-                document.getElementById('singapore_tokyo').value = 80;
-                document.getElementById('tokyo_sydney').value = 120;
-                document.getElementById('sydney_auckland').value = 25;
-                document.getElementById('sa_google_pop').value = 15;
-                document.getElementById('google_backbone').value = 280;
-                document.getElementById('vm_auckland').value = 24;
+                document.getElementById('iterations').value = 30;
+                document.getElementById('timeout').value = 15;
+                document.getElementById('testMode').value = 'ping';
+                
+                loadPresetScenario('sa-au-nz');
+                
+                document.getElementById('endpoint-status').innerHTML = '';
                 
                 updateStatus('Configuration reset to defaults', 'idle');
             }
         }
 
+        // Tab management
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            const clickedTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
+                tab.getAttribute('onclick').includes(tabName)
+            );
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+        }
+
+        // Status management
+        function updateStatus(message, type = 'idle') {
+            const statusElement = document.getElementById('status');
+            const indicator = statusElement.querySelector('.status-indicator');
+            
+            indicator.className = `status-indicator status-${type}`;
+            statusElement.querySelector('span:last-child').textContent = message;
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateStatus('Ready to run tests', 'idle');
+            loadPresetScenario('sa-au-nz'); // Load default scenario
+            updateStatus('Ready to test routing performance', 'idle');
         });
     </script>
 </body>

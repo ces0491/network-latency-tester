@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Geographic Routing Performance Testing Tool</title>
+    <meta name="description" content="Complete documentation for the Geographic Routing Performance Testing Tool">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.2em;
+        }
+
+        .header-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #2c3e50;
+            margin-top: 2em;
+            margin-bottom: 1em;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.3em;
+        }
+        
+        h2 {
+            font-size: 2em;
+            color: #34495e;
+        }
+        
+        h3 {
+            font-size: 1.5em;
+            color: #3498db;
+        }
+        
+        h4 {
+            font-size: 1.3em;
+            color: #e67e22;
+        }
+        
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+        
+        li {
+            margin-bottom: 0.5em;
+        }
+        
+        strong {
+            color: #2c3e50;
+        }
+        
+        code {
+            background: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h4 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 10px 10px 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 5px 10px;
+            display: block;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .toc a:hover {
+            background: #e9ecef;
+        }
+        
+        .usage-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .usage-example h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-nav {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-nav">
+                <a href="/" class="nav-link">🔙 Back to Tool</a>
+            </div>
+            <h1>📖 Documentation</h1>
+            <p>Geographic Routing Performance Testing Tool</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h3>📑 Table of Contents</h3>
+                <ul>
+                    <li><a href="#overview">🎯 What Is This Tool?</a></li>
+                    <li><a href="#features">✨ Key Features</a></li>
+                    <li><a href="#backend">🛠️ Backend Technology</a></li>
+                    <li><a href="#usage">🚀 How to Use</a></li>
+                    <li><a href="#applications">💼 Real-World Applications</a></li>
+                    <li><a href="#considerations">⚠️ Technical Considerations</a></li>
+                    <li><a href="#examples">📋 Usage Examples</a></li>
+                </ul>
+            </div>
+
+            <section id="overview">
+                <h1>🌐 Geographic Routing Performance Testing Tool</h1>
+                <h2>A Comprehensive Network Path Optimization Solution</h2>
+
+                <h3 id="what-is">What Is This Tool?</h3>
+
+                <p>The Geographic Routing Performance Testing Tool is a browser-based application designed to measure and compare network routing performance across different geographic paths and infrastructure providers. Built specifically for developers, network engineers, and IT teams who need to optimize their international connectivity, this tool helps answer critical questions like "Should we route through Google's backbone or traditional ISP infrastructure?" and "Which CDN or cloud provider offers the best performance for our users?"</p>
+
+                <p>Think of it as a sophisticated ping and traceroute utility that not only measures latency but provides comprehensive analysis, statistical insights, and actionable recommendations for network infrastructure decisions.</p>
+
+                <div class="success-box">
+                    <strong>🎯 Perfect For:</strong><br>
+                    • Development teams working with international infrastructure<br>
+                    • Network engineers optimizing routing decisions<br>
+                    • IT teams evaluating cloud provider performance<br>
+                    • Companies planning global infrastructure deployments
+                </div>
+            </section>
+
+            <section id="features">
+                <h2>✨ Key Features</h2>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎯 Flexible Scenario Testing</h4>
+                        <ul>
+                            <li><strong>Preset scenarios</strong> for common routing optimizations (SA→AU→NZ, US→EU, Asia Pacific)</li>
+                            <li><strong>Custom scenario builder</strong> for your specific geographic requirements</li>
+                            <li><strong>Route categorization</strong> (Traditional, Optimized, Reference, Custom) with visual indicators</li>
+                            <li><strong>Dynamic endpoint management</strong> - add, remove, and configure routing paths on the fly</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📊 Comprehensive Performance Analysis</h4>
+                        <ul>
+                            <li><strong>Statistical analysis</strong> including average, median, min/max, and standard deviation</li>
+                            <li><strong>Reliability metrics</strong> with success rates and error tracking</li>
+                            <li><strong>Consistency scoring</strong> to identify stable vs variable routing paths</li>
+                            <li><strong>Performance ranking</strong> with automatic best/worst route identification</li>
+                            <li><strong>Improvement calculations</strong> showing latency reduction and percentage gains</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>🛠️ Advanced Testing Capabilities</h4>
+                        <ul>
+                            <li><strong>Configurable test parameters</strong>: iterations (10-100), timeout (5-30s), test modes</li>
+                            <li><strong>Multiple test modes</strong>: Latency-focused (HEAD requests), Download tests, Comprehensive analysis</li>
+                            <li><strong>Real-time progress tracking</strong> with per-endpoint status updates</li>
+                            <li><strong>Connectivity testing</strong> to validate endpoints before running full test suites</li>
+                            <li><strong>CORS-aware testing</strong> with clear feedback on blocked endpoints</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h4>📈 Rich Visualization & Reporting</h4>
+                        <ul>
+                            <li><strong>Interactive dashboards</strong> with performance metrics and trend analysis</li>
+                            <li><strong>Detailed test logs</strong> with timestamp tracking and error reporting</li>
+                            <li><strong>Route performance rankings</strong> with medal-style visualization (🥇🥈🥉)</li>
+                            <li><strong>Exportable results</strong> in JSON format for further analysis or documentation</li>
+                            <li><strong>Responsive design</strong> that works on desktop, tablet, and mobile devices</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="backend">
+                <h2>🛠️ Backend Technology & Architecture</h2>
+
+                <h3>Client-Side Performance Engine</h3>
+                <p>The tool runs entirely in the browser using modern JavaScript APIs, making it accessible without server infrastructure while providing enterprise-grade testing capabilities.</p>
+
+                <div class="info-box">
+                    <strong>Core Measurement Technology:</strong>
+                    <pre><code>// High-precision timing using Performance API
+const startTime = performance.now();
+const response = await fetch(url, {
+    method: 'HEAD',
+    mode: 'cors',
+    cache: 'no-cache'
+});
+const latency = performance.now() - startTime;</code></pre>
+                </div>
+
+                <h4>Statistical Analysis Engine</h4>
+                <ul>
+                    <li><strong>Real-time calculations</strong> of mean, median, standard deviation, and percentiles</li>
+                    <li><strong>Outlier detection</strong> and variance analysis for consistency scoring</li>
+                    <li><strong>Success rate tracking</strong> with detailed error categorization</li>
+                    <li><strong>Performance trend analysis</strong> across multiple test iterations</li>
+                </ul>
+
+                <h4>Advanced Request Management</h4>
+                <ul>
+                    <li><strong>Concurrent request handling</strong> with configurable timeout controls</li>
+                    <li><strong>Automatic retry logic</strong> for failed requests</li>
+                    <li><strong>Request throttling</strong> to prevent overwhelming target endpoints</li>
+                    <li><strong>CORS error detection</strong> with fallback suggestions</li>
+                    <li><strong>Cache-busting headers</strong> to ensure accurate latency measurements</li>
+                </ul>
+
+                <h4>Data Processing Pipeline</h4>
+                <ol>
+                    <li><strong>Input validation</strong> and endpoint reachability verification</li>
+                    <li><strong>Test execution</strong> with progress tracking and real-time feedback</li>
+                    <li><strong>Statistical aggregation</strong> and performance ranking</li>
+                    <li><strong>Insight generation</strong> with improvement recommendations</li>
+                    <li><strong>Result formatting</strong> for display and export</li>
+                </ol>
+            </section>
+
+            <section id="usage">
+                <h2>🚀 How to Use the Tool</h2>
+
+                <h3>Getting Started (2 minutes)</h3>
+
+                <div class="usage-example">
+                    <h4>Step 1: Choose Your Scenario</h4>
+                    <p>Select a preset scenario (SA→AU→NZ, US→EU, Asia Pacific, or Custom). The tool automatically loads relevant endpoints for your selected scenario.</p>
+                </div>
+
+                <div class="usage-example">
+                    <h4>Step 2: Configure Test Parameters</h4>
+                    <ul>
+                        <li><strong>Iterations</strong>: 30 (recommended) for statistical significance</li>
+                        <li><strong>Timeout</strong>: 15 seconds for most scenarios</li>
+                        <li><strong>Test Mode</strong>: Latency Test for routing optimization</li>
+                    </ul>
+                </div>
+
+                <div class="usage-example">
+                    <h4>Step 3: Review Routing Endpoints</h4>
+                    <ul>
+                        <li>Enable/disable specific routes using checkboxes</li>
+                        <li>Modify URLs to test your actual infrastructure</li>
+                        <li>Add custom routes for comprehensive testing</li>
+                    </ul>
+                </div>
+
+                <h3>Running Tests (5-10 minutes)</h3>
+
+                <div class="usage-example">
+                    <h4>1. Click "🚀 Run Performance Tests"</h4>
+                    <ul>
+                        <li>The tool tests each enabled endpoint with your specified iterations</li>
+                        <li>Real-time progress tracking shows current test status</li>
+                        <li>Per-endpoint results update as tests complete</li>
+                    </ul>
+                </div>
+
+                <div class="usage-example">
+                    <h4>2. Monitor Progress</h4>
+                    <ul>
+                        <li><strong>Status indicators</strong> show testing progress (🟡 testing, 🟢 complete, 🔴 error)</li>
+                        <li><strong>Live logs</strong> provide detailed execution information</li>
+                        <li><strong>Progress bar</strong> shows overall completion status</li>
+                    </ul>
+                </div>
+
+                <h3>Analyzing Results</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tab</th>
+                            <th>Content</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Performance Overview</strong></td>
+                            <td>Key metrics, ranking, insights</td>
+                            <td>Quick decision making</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Detailed Results</strong></td>
+                            <td>Complete statistics, sample data</td>
+                            <td>Deep performance analysis</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Routing Analysis</strong></td>
+                            <td>Optimization recommendations</td>
+                            <td>Implementation guidance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Test Logs</strong></td>
+                            <td>Execution details, debugging</td>
+                            <td>Troubleshooting issues</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Advanced Usage Scenarios</h3>
+
+                <div class="usage-example">
+                    <h4>For Network Engineers</h4>
+                    <pre><code># Testing multiple CDN providers
+Route 1: CloudFlare CDN (Traditional)
+Route 2: Google Cloud CDN (Optimized)
+Route 3: AWS CloudFront (Reference)
+Route 4: Azure CDN (Reference)</code></pre>
+                </div>
+
+                <div class="usage-example">
+                    <h4>For Development Teams</h4>
+                    <pre><code># Testing database connection paths
+Route 1: Direct ISP routing (Traditional)
+Route 2: Google Cloud SQL proxy (Optimized)
+Route 3: SSH tunnel via AU VM (Hybrid)</code></pre>
+                </div>
+
+                <div class="usage-example">
+                    <h4>For Enterprise IT</h4>
+                    <pre><code># Testing international office connectivity
+Route 1: Corporate MPLS (Traditional)
+Route 2: SD-WAN provider (Optimized)
+Route 3: Direct internet (Reference)</code></pre>
+                </div>
+            </section>
+
+            <section id="applications">
+                <h2>💼 Real-World Applications</h2>
+
+                <h3>Infrastructure Decision Making</h3>
+                <ul>
+                    <li><strong>Cloud provider selection</strong> based on actual performance data</li>
+                    <li><strong>CDN optimization</strong> for global content delivery</li>
+                    <li><strong>Network architecture planning</strong> with quantified performance impacts</li>
+                </ul>
+
+                <h3>Development Workflow Optimization</h3>
+                <ul>
+                    <li><strong>Remote development environment</strong> routing optimization</li>
+                    <li><strong>CI/CD pipeline</strong> performance improvement</li>
+                    <li><strong>Database connection</strong> latency reduction</li>
+                </ul>
+
+                <h3>Business Case Development</h3>
+                <ul>
+                    <li><strong>Quantified performance improvements</strong> for infrastructure investments</li>
+                    <li><strong>Cost-benefit analysis</strong> with measurable latency reductions</li>
+                    <li><strong>ROI calculations</strong> based on productivity improvements</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>Case Study: SA→AU→NZ Development Team</strong><br>
+                    A 2-person development team in Cape Town working for a New Zealand company achieved <strong>285ms latency reduction (83% improvement)</strong> by routing through Google Cloud Australia instead of traditional European routing. This translated to significantly faster development cycles and improved remote collaboration.
+                </div>
+            </section>
+
+            <section id="considerations">
+                <h2>⚠️ Technical Considerations</h2>
+
+                <h3>Browser Compatibility</h3>
+                <ul>
+                    <li><strong>Modern browsers</strong> with Fetch API and Performance API support</li>
+                    <li><strong>CORS limitations</strong> may block some endpoints (tool provides alternatives)</li>
+                    <li><strong>No server requirements</strong> - runs entirely client-side</li>
+                </ul>
+
+                <h3>Network Considerations</h3>
+                <ul>
+                    <li><strong>Firewall-friendly</strong> using standard HTTP/HTTPS requests</li>
+                    <li><strong>Minimal bandwidth usage</strong> with HEAD requests and small payloads</li>
+                    <li><strong>Proxy-aware</strong> with automatic timeout handling</li>
+                </ul>
+
+                <h3>Accuracy & Limitations</h3>
+                <div class="warning-box">
+                    <strong>Important Limitations:</strong><br>
+                    • <strong>Client-side measurements</strong> may include browser overhead<br>
+                    • <strong>CORS restrictions</strong> limit some endpoint testing<br>
+                    • <strong>Network conditions</strong> can affect results (tool recommends multiple test runs)<br>
+                    • <strong>Best for relative comparisons</strong> rather than absolute latency measurements
+                </div>
+            </section>
+
+            <section id="examples">
+                <h2>📋 Usage Examples</h2>
+
+                <h3>Example 1: Cloud Provider Comparison</h3>
+                <div class="usage-example">
+                    <h4>Scenario: Selecting best cloud provider for Asia-Pacific deployment</h4>
+                    <ul>
+                        <li><strong>Route 1</strong>: AWS Singapore (Traditional)</li>
+                        <li><strong>Route 2</strong>: Google Cloud Australia (Optimized)</li>
+                        <li><strong>Route 3</strong>: Azure Japan (Reference)</li>
+                        <li><strong>Route 4</strong>: Alibaba Cloud Hong Kong (Custom)</li>
+                    </ul>
+                    <p><strong>Result</strong>: Data-driven decision with quantified performance differences and cost implications.</p>
+                </div>
+
+                <h3>Example 2: Development Environment Optimization</h3>
+                <div class="usage-example">
+                    <h4>Scenario: Remote team accessing development servers</h4>
+                    <ul>
+                        <li><strong>Route 1</strong>: Direct ISP connection (Traditional)</li>
+                        <li><strong>Route 2</strong>: VPN via cloud provider (Optimized)</li>
+                        <li><strong>Route 3</strong>: SSH tunnel through cloud VM (Hybrid)</li>
+                    </ul>
+                    <p><strong>Result</strong>: Optimized development workflow with measurable productivity improvements.</p>
+                </div>
+
+                <h3>Example 3: CDN Performance Analysis</h3>
+                <div class="usage-example">
+                    <h4>Scenario: Global content delivery optimization</h4>
+                    <ul>
+                        <li><strong>Route 1</strong>: Origin server direct (Traditional)</li>
+                        <li><strong>Route 2</strong>: CloudFlare CDN (Optimized)</li>
+                        <li><strong>Route 3</strong>: AWS CloudFront (Reference)</li>
+                        <li><strong>Route 4</strong>: Google Cloud CDN (Reference)</li>
+                    </ul>
+                    <p><strong>Result</strong>: Informed CDN selection with regional performance insights.</p>
+                </div>
+
+                <h3>Getting Maximum Value</h3>
+                <ol>
+                    <li><strong>Test during different times</strong> to account for network variability</li>
+                    <li><strong>Use actual infrastructure endpoints</strong> rather than generic test URLs</li>
+                    <li><strong>Run multiple test sessions</strong> over several days for comprehensive data</li>
+                    <li><strong>Export results</strong> for trend analysis and infrastructure planning</li>
+                    <li><strong>Share findings</strong> with your team using the built-in export functionality</li>
+                </ol>
+
+                <div class="info-box">
+                    <strong>💡 Pro Tip:</strong> The tool's strength lies in comparative analysis. Focus on the relative performance differences between routes rather than absolute latency numbers. This approach provides the most actionable insights for infrastructure decisions.
+                </div>
+            </section>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="/" class="btn btn-success">🚀 Start Testing Your Routes</a>
+                <a href="https://github.com/yourusername/routing-performance-tool" class="btn">📦 View on GitHub</a>
+            </div>
+
+            <div class="success-box">
+                <strong>🌟 Ready to Optimize Your Network Performance?</strong><br>
+                The Geographic Routing Performance Testing Tool transforms complex network performance analysis into actionable insights, helping teams make data-driven infrastructure decisions with confidence and precision.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
