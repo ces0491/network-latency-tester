@@ -2,7 +2,7 @@
 
 A comprehensive browser-based tool for measuring and comparing network routing performance across different geographic paths and infrastructure providers.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/geographic-routing-performance-tool)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://https://github.com/ces0491/network-latency-tester)
 
 ## 🎯 What This Tool Does
 
@@ -180,7 +180,7 @@ const latency = performance.now() - startTime;
 
 ### Development Setup
 ```bash
-git clone https://github.com/yourusername/geographic-routing-performance-tool.git
+git clone https://github.com/ces0491/network-latency-tester.git
 cd geographic-routing-performance-tool
 npm install
 npm run dev

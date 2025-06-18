@@ -83,64 +83,6 @@ network-latency-tester/
    - Drag and drop your project folder
    - Vercel will automatically deploy
 
-## ⚙️ Configuration Details
-
-### vercel.json Explanation
-
-```json
-{
-  "version": 2,                          // Vercel platform version
-  "name": "network-latency-tester",  // Project name
-  "builds": [
-    {
-      "src": "index.html",               // Main tool file
-      "use": "@vercel/static"            // Static file handler
-    },
-    {
-      "src": "docs.html",                // Documentation file
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",                        // Root route
-      "dest": "/index.html"              // Serves main tool
-    },
-    {
-      "src": "/docs.html",               // Direct docs access
-      "dest": "/docs.html"
-    },
-    {
-      "src": "/docs",                    // Clean docs URL
-      "dest": "/docs.html"
-    }
-  ],
-  "headers": [                           // Security headers
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    }
-  ]
-}
-```
-
 ## 🌐 Custom Domain Setup (Optional)
 
 1. **Purchase/Configure Domain**
@@ -207,7 +149,6 @@ For this static site, no build commands are needed. However, if you want to add 
 
 1. **404 Errors**
    - Ensure `index.html` is in the root directory
-   - Check `vercel.json` routes configuration
    - Verify file names match exactly
 
 2. **CORS Issues**
@@ -270,8 +211,8 @@ For this static site, no build commands are needed. However, if you want to add 
 ## 🎉 Success!
 
 Your Geographic Routing Performance Testing Tool should now be live at:
-- **Main Tool**: `https://your-project.vercel.app`
-- **Documentation**: `https://your-project.vercel.app/docs`
+- **Main Tool**: `https://network-latency-tester-jo9sk9am6-cesaires-projects.vercel.app/`
+- **Documentation**: `https://network-latency-tester-jo9sk9am6-cesaires-projects.vercel.app/docs`
 
 ## 📞 Support
 
